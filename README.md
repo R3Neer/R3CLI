@@ -27,10 +27,23 @@ contains ANSI escape sequences.
 See [`docs/design-language.md`](docs/design-language.md) for the complete visual
 contract.
 
-## Development
+## Maintaining R3CLI
+
+These commands are for contributors changing R3CLI itself, not for tools that
+use it as a dependency. From a local clone, install the library together with
+its test dependencies in editable mode:
 
 ```console
 python -m pip install -e ".[test]"
+```
+
+Editable installation means changes under `src/r3_cli/` are used immediately;
+there is no need to reinstall the package after each change.
+
+Run the test suite after changing the renderer, theme, help system or public
+API:
+
+```console
 pytest
 ```
 
