@@ -1,0 +1,38 @@
+[help]
+product = "MY TOOL"
+version = "1.0.0"
+description = "Describe what the tool helps the user accomplish."
+invocation = "mytool"
+group-order = ["PROJECTS", "MAINTENANCE"]
+usage = [
+  "mytool <command> [arguments] [options]",
+  "mytool <command> --help",
+  "mytool --version",
+]
+notes = ["Run mytool <command> --help for detailed help."]
+show-help-on-empty = true
+help-options = ["-h", "--help"]
+
+[[commands]]
+name = "list"
+group = "PROJECTS"
+summary = "Show registered projects"
+description = "Show every registered project with its name, ID and location."
+usage = ["mytool list"]
+
+[[commands]]
+name = "check"
+group = "MAINTENANCE"
+summary = "Check a project"
+description = "Check project structure and report actionable findings."
+usage = ["mytool check <project> [options]"]
+notes = ["Checking never modifies the project."]
+examples = ["mytool check example", "mytool check example --strict"]
+
+[[commands.items]]
+label = "<project>"
+description = "Stable project ID."
+
+[[commands.items]]
+label = "--strict"
+description = "Treat incomplete metadata as a failure."

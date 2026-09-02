@@ -11,6 +11,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.text import Text
 
+from .help import HelpCatalogue
 from .models import CliError, ColourMode, Diagnostic
 from .theme import Theme, load_theme
 
@@ -148,10 +149,70 @@ class ConsoleUI:
         self.out.print(line)
 
     def help_row(self, label: str, description: str, *, width: int = 24) -> None:
+        if self.out.width < 40 or width + 4 >= self.out.width:
+            self.out.print(self._text("  " + label, "accent"))
+            self.out.print(self._text("    " + description, "secondary"))
+            return
         line = Text("  ")
         line.append(label.ljust(width), style=self.theme.colour("accent"))
         line.append(description, style=self.theme.colour("secondary"))
         self.out.print(line)
+
+    def help_text(self, text: str) -> None:
+        self.out.print(self._text(text, "value"))
+
+    def help_overview(self, catalogue: HelpCatalogue) -> None:
+        catalogue.validate()
+        self.banner(catalogue.title)
+        self.help_text(catalogue.description)
+        self.heading("usage")
+        usage = catalogue.usage or (
+            f"{catalogue.invocation} <command> [arguments] [options]",
+            f"{catalogue.invocation} <command> --help",
+        )
+        for line in usage:
+            self.command(line)
+        row_width = min(24, max((len(command.name) for command in catalogue.commands), default=0) + 2)
+        for group in catalogue.groups:
+            commands = [command for command in catalogue.commands if command.group == group]
+            if not commands:
+                continue
+            self.heading(group)
+            for command in commands:
+                self.help_row(command.name, command.summary, width=row_width)
+        if catalogue.notes:
+            self.out.print()
+        for note in catalogue.notes:
+            self.info(note)
+        self.out.print()
+
+    def help_command(self, catalogue: HelpCatalogue, command_name: str) -> None:
+        command = catalogue.command(command_name)
+        self.banner(command.name.upper())
+        self.help_text(command.description)
+        self.heading("usage")
+        for line in command.usage:
+            self.command(line)
+        if command.items:
+            self.heading("arguments and options")
+            row_width = min(28, max(len(item.label) for item in command.items) + 2)
+            for item in command.items:
+                self.help_row(item.label, item.description, width=row_width)
+        if command.notes:
+            self.heading("notes")
+            for note in command.notes:
+                self.info(note)
+        if command.examples:
+            self.heading("examples")
+            for example in command.examples:
+                self.command(example)
+        self.out.print()
+
+    def help(self, catalogue: HelpCatalogue, command: str | None = None) -> None:
+        if command is None:
+            self.help_overview(catalogue)
+        else:
+            self.help_command(catalogue, command)
 
     def table(self, headers: Sequence[str], rows: Iterable[Sequence[object]]) -> None:
         table = Table(show_header=True, box=None, pad_edge=False)

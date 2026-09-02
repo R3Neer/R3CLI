@@ -16,6 +16,8 @@ belong in consumer themes rather than the universal palette.
 
 - A banner uses a double horizontal rule and one bold product title.
 - Help uses uppercase section names, indented command rows and aligned labels.
+  Its catalogue, routing and detailed page contract are specified in
+  [`help-system.md`](help-system.md).
 - Work in progress uses `→`; success uses `✓`; information uses `•`; warnings
   use `!`; failures use `✗`. ASCII fallbacks are `>`, `+`, `*`, `!` and `x`.
 - Tables avoid ornamental borders unless a border materially improves reading.
