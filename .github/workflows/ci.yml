@@ -15,5 +15,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - run: python -m pip install -e . pytest
+      - run: python -m pip install -e ".[test]"
       - run: pytest
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install build
+      - run: python -m build
+      - run: python -m pip install --force-reinstall dist/*.whl pytest
+      - run: python -c "import r3_cli; assert r3_cli.__version__ == '0.2.0'"
+      - run: python -m pytest
