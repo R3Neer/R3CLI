@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "r3-cli"
+version = "0.1.0"
+description = "A shared visual language for R3Neer's command-line tools"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "R3Neer" }]
+dependencies = ["rich>=14,<15"]
+classifiers = [
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8,<10"]
+
+[project.urls]
+Repository = "https://github.com/R3Neer/R3CLI"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/r3_cli"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
