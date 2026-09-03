@@ -95,19 +95,28 @@ function Write-R3Line {
                     $style += "$escape[38;2;$($rgb)m"
                 }
             }
-            $elements = [Globalization.StringInfo]::GetTextElementEnumerator($text)
-            while ($elements.MoveNext()) {
-                $element = $elements.GetTextElement()
-                $cells = Get-R3CellWidth $element
-                if ($element -eq "`n" -or ($column -gt 0 -and $column + $cells -gt $Console.Width)) {
+            foreach ($token in [regex]::Matches($text, '\s+|\S+')) {
+                $tokenWidth = 0
+                $measure = [Globalization.StringInfo]::GetTextElementEnumerator($token.Value)
+                while ($measure.MoveNext()) { $tokenWidth += Get-R3CellWidth $measure.GetTextElement() }
+                if ($token.Value -match '^\S' -and $tokenWidth -le $Console.Width -and $column -gt 0 -and $column + $tokenWidth -gt $Console.Width) {
                     Send-R3Text $Console $line.ToString() $Stream
                     [void]$line.Clear(); $column = 0
                 }
-                if ($element -eq "`n") { continue }
-                if ($style) { [void]$line.Append($style) }
-                [void]$line.Append($element)
-                if ($style) { [void]$line.Append("$escape[0m") }
-                $column += $cells
+                $elements = [Globalization.StringInfo]::GetTextElementEnumerator($token.Value)
+                while ($elements.MoveNext()) {
+                    $element = $elements.GetTextElement()
+                    $cells = Get-R3CellWidth $element
+                    if ($element -eq "`n" -or ($column -gt 0 -and $column + $cells -gt $Console.Width)) {
+                        Send-R3Text $Console $line.ToString() $Stream
+                        [void]$line.Clear(); $column = 0
+                    }
+                    if ($element -eq "`n") { continue }
+                    if ($style) { [void]$line.Append($style) }
+                    [void]$line.Append($element)
+                    if ($style) { [void]$line.Append("$escape[0m") }
+                    $column += $cells
+                }
             }
         }
         Send-R3Text $Console $line.ToString() $Stream

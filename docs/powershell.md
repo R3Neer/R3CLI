@@ -36,7 +36,7 @@ No preferences or environment variables are changed by the adapter.
 `Write-R3Banner`, `Write-R3Heading`, `Write-R3Section`, `Write-R3Status`,
 `Write-R3KeyValue` and `Write-R3Table` provide the standard components.
 `Write-R3Line` accepts literal strings or segments with `Text`, `Role`, `Bold`.
-It validates roles and wraps text at grapheme boundaries without losing content.
+It validates roles, wraps at word boundaries and splits oversized tokens at grapheme boundaries without losing content.
 `-NoNewline` buffers segments until the next completed line, preserving styled
 composition while allowing width-aware wrapping. It does not write partial
 terminal output. Use `Get-R3Symbol` for shared symbols including status and

@@ -64,6 +64,8 @@ foreach ($width in @(30,50,80,120)) {
     Write-R3Help $console $catalogue check
     Assert-Contract (@($script:lines | Where-Object Length -gt $width).Count -eq 0) "Help exceeded width $width"
     Assert-Contract (($script:lines -join '') -match 'Choose content without truncating this description\.') 'Help lost content'
+    Write-R3Line $console @(@{Text='Keep complete words when wrapping narrow descriptions';Role='value'})
+    Assert-Contract (-not @($script:lines | Where-Object { $_ -match 'wrapp$|descri$' }).Count) 'Words were split despite fitting the terminal width'
     Write-R3Line $console @(@{Text='[literal] café 漢字';Role='accent'})
     Assert-Contract ($script:lines[-1] -ceq '[literal] café 漢字') 'Literal text was interpreted as markup'
     Write-R3Table $console @('NAME','VALUE') @(,@('Long name with spaces','Very long value that must be preserved'))
