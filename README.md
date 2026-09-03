@@ -27,6 +27,12 @@ contains ANSI escape sequences.
 See [`docs/design-language.md`](docs/design-language.md) for the complete visual
 contract.
 
+## PowerShell consumers
+
+R3CLI also provides an official PowerShell 7 adapter. It uses the same canonical
+palette, symbols and help contract as Python, without requiring Python at runtime.
+See [the PowerShell API and packaging guide](docs/powershell.md).
+
 ## Maintaining R3CLI
 
 These commands are for contributors changing R3CLI itself, not for tools that

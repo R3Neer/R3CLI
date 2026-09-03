@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import sys
+from importlib.resources import files
 from collections.abc import Iterable, Sequence
 from typing import Any, TextIO
 
@@ -14,6 +15,8 @@ from rich.text import Text
 from .help import HelpCatalogue
 from .models import CliError, ColourMode, Diagnostic
 from .theme import Theme, load_theme
+
+SYMBOLS = json.loads(files("r3_cli").joinpath("symbols.json").read_text(encoding="utf-8"))
 
 
 def add_output_arguments(parser: argparse.ArgumentParser) -> None:
@@ -74,19 +77,12 @@ class ConsoleUI:
         return Text(str(value), style=style)
 
     def _symbol(self, kind: str) -> str:
-        symbols = {
-            "step": ("→", ">"),
-            "success": ("✓", "+"),
-            "info": ("•", "*"),
-            "warning": ("!", "!"),
-            "error": ("✗", "x"),
-        }
-        unicode_symbol, ascii_symbol = symbols[kind]
+        unicode_symbol, ascii_symbol = SYMBOLS[kind]
         return ascii_symbol if self.ascii else unicode_symbol
 
     def banner(self, text: str) -> None:
         width = max(24, min(68, self.out.width))
-        rule = ("=" if self.ascii else "═") * width
+        rule = self._symbol("banner") * width
         self.out.print()
         self.out.print(self._text(rule, "secondary"))
         title = Text(" ")
@@ -106,7 +102,7 @@ class ConsoleUI:
             line.append("  ")
             line.append(str(count), style=self.theme.colour("accent"))
         self.out.print(line)
-        self.out.print(self._text("  " + ("-" if self.ascii else "─") * max(20, min(64, self.out.width - 2)), "secondary"))
+        self.out.print(self._text("  " + self._symbol("rule") * max(20, min(64, self.out.width - 2)), "secondary"))
 
     def _status(self, kind: str, text: str, *, error: bool = False) -> None:
         role = {"step": "process", "success": "success", "info": "heading", "warning": "process", "error": "error"}[kind]
@@ -237,6 +233,13 @@ class ConsoleUI:
         if multiline:
             stream.write("\n")
         stream.flush()
+
+    def line(self, segments: Iterable[dict[str, Any]], *, error: bool = False) -> None:
+        """Compose literal text using public semantic roles; no Rich markup."""
+        line = Text()
+        for segment in segments:
+            line.append_text(self._text(segment.get("text", ""), segment.get("role"), bold=segment.get("bold", False)))
+        (self.err if error else self.out).print(line)
 
     def table(self, headers: Sequence[str], rows: Iterable[Sequence[object]]) -> None:
         table = Table(show_header=True, box=None, pad_edge=False)

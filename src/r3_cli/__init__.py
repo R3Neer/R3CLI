@@ -9,7 +9,7 @@ from .help import (
     validate_argparse_catalogue,
 )
 from .models import CliError, ColourMode, Diagnostic, Level
-from .theme import Theme, load_theme
+from .theme import Theme, compose_theme, load_theme
 
 __all__ = [
     "CliError",
@@ -26,6 +26,7 @@ __all__ = [
     "add_output_arguments",
     "load_help_catalogue",
     "load_theme",
+    "compose_theme",
     "resolve_help_request",
     "validate_argparse_catalogue",
 ]

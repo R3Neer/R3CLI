@@ -77,3 +77,13 @@ def load_theme(path: Path | None = None) -> Theme:
             hint="provide a readable TOML theme path",
         ) from exc
     return _load(data, str(path))
+
+
+def compose_theme(extension: Mapping[str, str], base: Theme | None = None) -> Theme:
+    """Inherit the canonical palette and apply explicit product roles/overrides."""
+    colours = dict((base or load_theme()).colours)
+    for role, value in extension.items():
+        if not isinstance(value, str) or not HEX_COLOUR.fullmatch(value):
+            raise CliError(f"Theme role '{role}' must use #RRGGBB.", code="R3CLI.Theme.InvalidColours")
+        colours[role] = value.upper()
+    return Theme(colours)
