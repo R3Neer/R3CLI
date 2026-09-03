@@ -1,0 +1,13 @@
+{
+  "width": 50,
+  "product": "R3 TOOL 0.1",
+  "commands": [
+    {"op": "banner", "text": "R3 TOOL 0.1"},
+    {"op": "heading", "text": "usage"},
+    {"op": "line", "segments": [{"text": "  tool check", "role": "accent"}, {"text": " [literal] café", "role": "secondary"}]},
+    {"op": "info", "text": "Run with --help."},
+    {"op": "success", "text": "Ready."}
+  ],
+  "ascii": "\n==================================================\n R3 TOOL 0.1\n==================================================\n\nUSAGE\n  tool check [literal] café\n* Run with --help.\n+ Ready.\n",
+  "unicode": "\n══════════════════════════════════════════════════\n R3 TOOL 0.1\n══════════════════════════════════════════════════\n\nUSAGE\n  tool check [literal] café\n• Run with --help.\n✓ Ready.\n"
+}
