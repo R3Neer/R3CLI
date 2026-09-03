@@ -205,7 +205,18 @@ def validate_argparse_catalogue(parser: argparse.ArgumentParser, catalogue: Help
     """
     catalogue.validate()
     subparser_actions = [action for action in parser._actions if isinstance(action, argparse._SubParsersAction)]
-    root_actions = [action for action in parser._actions if action not in subparser_actions]
+    command_names = {command.name.casefold() for command in catalogue.commands}
+    dispatch_actions = [
+        action
+        for action in parser._actions
+        if isinstance(action, argparse._SubParsersAction)
+        or (
+            action.dest == "command"
+            and action.choices is not None
+            and {str(value).casefold() for value in action.choices} == command_names
+        )
+    ]
+    root_actions = [action for action in parser._actions if action not in dispatch_actions]
     errors: list[str] = []
     missing_root = _coverage_errors(root_actions, catalogue.global_items)
     if missing_root:

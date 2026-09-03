@@ -197,6 +197,12 @@ def test_argparse_coverage_reports_missing_inputs() -> None:
     assert "command 'check' has undocumented inputs: --write" in (caught.value.details or "")
 
 
+def test_argparse_coverage_ignores_a_choice_based_command_dispatcher() -> None:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("command", choices=("list", "check"))
+    validate_argparse_catalogue(parser, catalogue())
+
+
 def test_toml_template_loads() -> None:
     path = Path(__file__).resolve().parents[1] / "templates" / "help-catalogue.toml"
     loaded = load_help_catalogue(path)
