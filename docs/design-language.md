@@ -21,6 +21,11 @@ belong in consumer themes rather than the universal palette.
 - Work in progress uses `→`; success uses `✓`; information uses `•`; warnings
   use `!`; failures use `✗`. ASCII fallbacks are `>`, `+`, `*`, `!` and `x`.
 - Tables avoid ornamental borders unless a border materially improves reading.
+- A multiline human response has one blank line before and after it, so it is
+  visually separate from the invoking shell prompt. `ConsoleUI.help()` already
+  follows this rule; use `ConsoleUI.response()` for plain text produced by an
+  external renderer such as `argparse`. Single-line values and structured JSON
+  remain compact.
 - Output ends cleanly and does not depend on a particular background colour.
 
 ## Errors

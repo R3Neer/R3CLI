@@ -4,7 +4,9 @@ import io
 import json
 import re
 
-from r3_cli import CliError, ConsoleUI, Diagnostic
+import pytest
+
+from r3_cli import CliError, ConsoleUI, Diagnostic, R3ArgumentParser
 
 
 def test_plain_help_hierarchy() -> None:
@@ -46,6 +48,32 @@ def test_json_is_never_styled() -> None:
     ui.json({"status": "ok"})
     assert json.loads(output.getvalue()) == {"status": "ok"}
     assert "\x1b[" not in output.getvalue()
+
+
+def test_multiline_response_has_a_blank_margin_at_both_ends() -> None:
+    output = io.StringIO()
+    ui = ConsoleUI(colour="never", stdout=output)
+    ui.response("usage: r3tool [options]\n\noptions:\n  --help\n")
+    assert output.getvalue() == "\nusage: r3tool [options]\n\noptions:\n  --help\n\n"
+
+
+def test_single_line_response_stays_compact() -> None:
+    output = io.StringIO()
+    ui = ConsoleUI(colour="never", stdout=output)
+    ui.response("0.3.0")
+    assert output.getvalue() == "0.3.0\n"
+
+
+def test_argparse_adapter_wraps_multiline_help_but_not_version(capsys) -> None:
+    parser = R3ArgumentParser(prog="r3tool")
+    parser.add_argument("--version", action="version", version="r3tool 0.3.0")
+    parser.add_argument("--check", action="store_true")
+    with pytest.raises(SystemExit, match="0"):
+        parser.parse_args(["--help"])
+    assert capsys.readouterr().out.startswith("\nusage: r3tool")
+    with pytest.raises(SystemExit, match="0"):
+        parser.parse_args(["--version"])
+    assert capsys.readouterr().out == "r3tool 0.3.0\n"
 
 
 def test_diagnostic_contract_uses_stderr() -> None:

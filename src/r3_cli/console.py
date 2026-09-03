@@ -214,6 +214,25 @@ class ConsoleUI:
         else:
             self.help_command(catalogue, command)
 
+    def response(self, text: str, *, error: bool = False) -> None:
+        """Write plain human text, separating a multiline response from the shell prompt.
+
+        Use this for help or reports produced by an external renderer such as
+        ``argparse``. Structured output belongs to :meth:`json` instead.
+        """
+        if not text:
+            return
+        stream = self.stderr_stream if error else self.stdout_stream
+        multiline = "\n" in text.rstrip("\n")
+        if multiline:
+            stream.write("\n")
+        stream.write(text)
+        if not text.endswith("\n"):
+            stream.write("\n")
+        if multiline:
+            stream.write("\n")
+        stream.flush()
+
     def table(self, headers: Sequence[str], rows: Iterable[Sequence[object]]) -> None:
         table = Table(show_header=True, box=None, pad_edge=False)
         for header in headers:
@@ -241,3 +260,13 @@ class ConsoleUI:
     def json(self, value: Any) -> None:
         self.stdout_stream.write(json.dumps(value, ensure_ascii=False, sort_keys=True) + "\n")
         self.stdout_stream.flush()
+
+
+class R3ArgumentParser(argparse.ArgumentParser):
+    """An ``argparse`` parser that applies R3CLI's human-response spacing."""
+
+    def _print_message(self, message: str | None, file: TextIO | None = None) -> None:
+        if not message:
+            return
+        target = file or sys.stdout
+        ConsoleUI(colour=ColourMode.NEVER, stdout=target, stderr=target).response(message)

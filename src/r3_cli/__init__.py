@@ -1,4 +1,4 @@
-from .console import ConsoleUI, add_output_arguments
+from .console import ConsoleUI, R3ArgumentParser, add_output_arguments
 from .help import (
     CommandHelp,
     HelpCatalogue,
@@ -20,6 +20,7 @@ __all__ = [
     "HelpItem",
     "HelpRequest",
     "Level",
+    "R3ArgumentParser",
     "Theme",
     "add_output_arguments",
     "load_help_catalogue",
@@ -27,4 +28,4 @@ __all__ = [
     "resolve_help_request",
 ]
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"

@@ -37,6 +37,10 @@ if request is not None:
 
 Applications remain free to use `argparse`, Click, Typer or their own parser.
 R3CLI owns the visual and behavioural help contract, not execution semantics.
+When an application must retain a parser's plain multiline help, it should pass
+`parser.format_help()` to `ConsoleUI.response()` rather than print it directly.
+For `argparse`, use `R3ArgumentParser` instead: it applies the same rule to
+global and command help while preserving compact one-line `--version` output.
 
 ## Catalogue API
 
