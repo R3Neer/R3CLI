@@ -18,6 +18,9 @@ belong in consumer themes rather than the universal palette.
 - Help uses uppercase section names, indented command rows and aligned labels.
   Its catalogue, routing and detailed page contract are specified in
   [`help-system.md`](help-system.md).
+- Help is complete rather than merely syntactic: every operational input has a
+  concise explanation, global inputs appear under `GLOBAL OPTIONS`, and command
+  inputs appear under `ARGUMENTS AND OPTIONS`.
 - Work in progress uses `→`; success uses `✓`; information uses `•`; warnings
   use `!`; failures use `✗`. ASCII fallbacks are `>`, `+`, `*`, `!` and `x`.
 - Tables avoid ornamental borders unless a border materially improves reading.

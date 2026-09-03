@@ -172,6 +172,11 @@ class ConsoleUI:
         )
         for line in usage:
             self.command(line)
+        if catalogue.global_items:
+            self.heading("global options")
+            row_width = min(28, max(len(item.label) for item in catalogue.global_items) + 2)
+            for item in catalogue.global_items:
+                self.help_row(item.label, item.description, width=row_width)
         row_width = min(24, max((len(command.name) for command in catalogue.commands), default=0) + 2)
         for group in catalogue.groups:
             commands = [command for command in catalogue.commands if command.group == group]

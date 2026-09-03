@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import argparse
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,7 @@ from r3_cli import (
     HelpRequest,
     load_help_catalogue,
     resolve_help_request,
+    validate_argparse_catalogue,
 )
 
 
@@ -30,6 +32,11 @@ def catalogue() -> HelpCatalogue:
             "r3tool --version",
         ),
         notes=("Run r3tool <command> --help for detailed help.",),
+        global_items=(
+            HelpItem("--version", "Print the installed version and exit."),
+            HelpItem("--colour auto|always|never", "Control colour output."),
+            HelpItem("--ascii", "Use ASCII status symbols."),
+        ),
         commands=(
             CommandHelp(
                 "list",
@@ -65,6 +72,10 @@ def test_overview_snapshot() -> None:
         "  r3tool <command> [arguments] [options]\n"
         "  r3tool <command> --help\n"
         "  r3tool --version\n"
+        "\nGLOBAL OPTIONS\n"
+        "  --version                   Print the installed version and exit.\n"
+        "  --colour auto|always|never  Control colour output.\n"
+        "  --ascii                     Use ASCII status symbols.\n"
         "\nPROJECTS\n"
         "  list   Show projects\n"
         "\nMAINTENANCE\n"
@@ -156,6 +167,34 @@ def test_catalogue_detects_dispatch_drift() -> None:
         catalogue().validate(("list", "build"))
     assert "undocumented executable commands: build" in (caught.value.details or "")
     assert "documented commands without an executable: check" in (caught.value.details or "")
+
+
+def test_argparse_coverage_accepts_documented_inputs() -> None:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--version", action="version", version="r3tool 0.4.0")
+    parser.add_argument("--colour")
+    parser.add_argument("--ascii", action="store_true")
+    commands = parser.add_subparsers(dest="command", required=True)
+    check = commands.add_parser("check", add_help=False)
+    check.add_argument("project")
+    check.add_argument("--strict", action="store_true")
+    validate_argparse_catalogue(parser, catalogue())
+
+
+def test_argparse_coverage_reports_missing_inputs() -> None:
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--version", action="version", version="r3tool 0.4.0")
+    parser.add_argument("--colour")
+    parser.add_argument("--ascii", action="store_true")
+    commands = parser.add_subparsers(dest="command", required=True)
+    check = commands.add_parser("check", add_help=False)
+    check.add_argument("project")
+    check.add_argument("--strict", action="store_true")
+    check.add_argument("--write", action="store_true")
+    with pytest.raises(CliError) as caught:
+        validate_argparse_catalogue(parser, catalogue())
+    assert caught.value.code == "R3CLI.Help.IncompleteCoverage"
+    assert "command 'check' has undocumented inputs: --write" in (caught.value.details or "")
 
 
 def test_toml_template_loads() -> None:

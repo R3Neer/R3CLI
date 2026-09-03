@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import argparse
+import re
 import tomllib
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
@@ -43,6 +45,7 @@ class HelpCatalogue:
     commands: Sequence[CommandHelp]
     usage: Sequence[str] = field(default_factory=tuple)
     notes: Sequence[str] = field(default_factory=tuple)
+    global_items: Sequence[HelpItem] = field(default_factory=tuple)
     show_help_on_empty: bool = True
     help_options: Sequence[str] = ("-h", "--help")
 
@@ -51,6 +54,7 @@ class HelpCatalogue:
         object.__setattr__(self, "commands", tuple(self.commands))
         object.__setattr__(self, "usage", tuple(self.usage))
         object.__setattr__(self, "notes", tuple(self.notes))
+        object.__setattr__(self, "global_items", tuple(self.global_items))
         object.__setattr__(self, "help_options", tuple(self.help_options))
 
     @property
@@ -65,6 +69,9 @@ class HelpCatalogue:
             "invocation": self.invocation,
         }
         errors.extend(f"{name} is empty" for name, value in required.items() if not value.strip())
+        for item in self.global_items:
+            if not item.label.strip() or not item.description.strip():
+                errors.append("global help contains an incomplete help item")
 
         folded_groups = [group.casefold() for group in self.groups]
         if len(folded_groups) != len(set(folded_groups)):
@@ -155,6 +162,73 @@ def resolve_help_request(argv: Sequence[str], catalogue: HelpCatalogue) -> HelpR
     return None
 
 
+_OPTION_PATTERN = re.compile(r"--[A-Za-z0-9][A-Za-z0-9-]*")
+_WORD_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9_-]*")
+
+
+def _documented_keys(items: Iterable[HelpItem]) -> set[str]:
+    keys: set[str] = set()
+    for item in items:
+        keys.update(value.casefold() for value in _OPTION_PATTERN.findall(item.label))
+        label = item.label.replace("<", " ").replace(">", " ").replace("[", " ").replace("]", " ")
+        keys.update(value.casefold() for value in _WORD_PATTERN.findall(label) if not value.startswith("--"))
+    return keys
+
+
+def _action_keys(action: argparse.Action) -> set[str]:
+    if action.option_strings:
+        return {option.casefold() for option in action.option_strings if option not in {"-h", "--help"}}
+    if action.dest in {argparse.SUPPRESS, "help"}:
+        return set()
+    return {str(action.dest).casefold()}
+
+
+def _coverage_errors(actions: Iterable[argparse.Action], items: Iterable[HelpItem]) -> list[str]:
+    documented = _documented_keys(items)
+    missing = sorted(
+        key
+        for action in actions
+        for key in _action_keys(action)
+        if key not in documented
+    )
+    return missing
+
+
+def validate_argparse_catalogue(parser: argparse.ArgumentParser, catalogue: HelpCatalogue) -> None:
+    """Verify that an ``argparse`` parser exposes only documented inputs.
+
+    Root options must occur in :attr:`HelpCatalogue.global_items`; direct
+    subparser inputs must occur in the corresponding :class:`CommandHelp`.
+    Standard help actions and subparser dispatch itself are intentionally
+    excluded. Applications with another parser may use the catalogue without
+    this optional validation.
+    """
+    catalogue.validate()
+    subparser_actions = [action for action in parser._actions if isinstance(action, argparse._SubParsersAction)]
+    root_actions = [action for action in parser._actions if action not in subparser_actions]
+    errors: list[str] = []
+    missing_root = _coverage_errors(root_actions, catalogue.global_items)
+    if missing_root:
+        errors.append("undocumented global inputs: " + ", ".join(missing_root))
+    for subparsers in subparser_actions:
+        for name, command_parser in subparsers.choices.items():
+            try:
+                command = catalogue.command(name)
+            except CliError:
+                continue
+            nested = [action for action in command_parser._actions if not isinstance(action, argparse._SubParsersAction)]
+            missing = _coverage_errors(nested, command.items)
+            if missing:
+                errors.append(f"command '{name}' has undocumented inputs: " + ", ".join(missing))
+    if errors:
+        raise CliError(
+            "The help catalogue does not document every command-line input.",
+            code="R3CLI.Help.IncompleteCoverage",
+            details="; ".join(errors),
+            hint="add the missing inputs to the R3CLI help catalogue",
+        )
+
+
 def _string(value: Any, label: str) -> str:
     if not isinstance(value, str):
         raise ValueError(f"{label} must be a string")
@@ -175,6 +249,19 @@ def load_help_catalogue(path: Path) -> HelpCatalogue:
         if not isinstance(metadata, dict) or not isinstance(raw_commands, list):
             raise ValueError("[help] must be a table and commands must be an array")
         commands: list[CommandHelp] = []
+        raw_global_items = metadata.get("global-items", [])
+        if not isinstance(raw_global_items, list):
+            raise ValueError("help.global-items must be an array")
+        global_items = tuple(
+            HelpItem(
+                _string(item["label"], "help.global-items.label"),
+                _string(item["description"], "help.global-items.description"),
+            )
+            for item in raw_global_items
+            if isinstance(item, dict)
+        )
+        if len(global_items) != len(raw_global_items):
+            raise ValueError("help.global-items must contain tables")
         for index, raw in enumerate(raw_commands):
             if not isinstance(raw, dict):
                 raise ValueError(f"commands[{index}] must be a table")
@@ -212,6 +299,7 @@ def load_help_catalogue(path: Path) -> HelpCatalogue:
             commands=commands,
             usage=_strings(metadata.get("usage", []), "help.usage"),
             notes=_strings(metadata.get("notes", []), "help.notes"),
+            global_items=global_items,
             show_help_on_empty=metadata.get("show-help-on-empty", True),
             help_options=_strings(metadata.get("help-options", ["-h", "--help"]), "help.help-options"),
         )

@@ -20,6 +20,14 @@ catalogue as a grouped overview or a focused command page.
 - `--version` is a global option and prints one undecorated line.
 - Every executable command appears exactly once in the catalogue. CI should
   call `catalogue.validate(executable_commands)` to detect drift.
+- Every operational positional argument and option has one help item. Its
+  description says what it accepts, what it changes and any meaningful default
+  or restriction. Standard `-h` and `--help` are the only intentional
+  exception.
+- Global inputs such as `--version`, output format and presentation options
+  live in `global_items`; command-specific inputs live in `CommandHelp.items`.
+  Use `NOTES` for safety, incompatibility, environment and stateful behaviour,
+  and add examples for non-obvious or writing commands.
 
 The routing helper recognises these rules without taking ownership of command
 parsing:
@@ -42,6 +50,19 @@ When an application must retain a parser's plain multiline help, it should pass
 For `argparse`, use `R3ArgumentParser` instead: it applies the same rule to
 global and command help while preserving compact one-line `--version` output.
 
+For `argparse` applications, validate the documentation against the parser at
+startup and in tests:
+
+```python
+from r3_cli import validate_argparse_catalogue
+
+validate_argparse_catalogue(parser, catalogue)
+```
+
+It rejects a root option missing from `global_items`, or a command input
+missing from that command's `items`. Other parser ecosystems can use the same
+catalogue contract and provide an equivalent adapter.
+
 ## Catalogue API
 
 Catalogues can be constructed in Python:
@@ -57,6 +78,10 @@ catalogue = HelpCatalogue(
     groups=("PROJECTS",),
     usage=("mytool <command> [arguments] [options]", "mytool <command> --help"),
     notes=("Run mytool <command> --help for detailed help.",),
+    global_items=(
+        HelpItem("--version", "Print the installed version and exit."),
+        HelpItem("--colour auto|always|never", "Control colour output."),
+    ),
     commands=(
         CommandHelp(
             name="check",
@@ -86,8 +111,8 @@ validation even when they cannot reuse the Python renderer directly.
 
 ## Presentation
 
-The overview contains, in order: product banner, description, `USAGE`, grouped
-commands and short closing guidance. A command page contains its command
+The overview contains, in order: product banner, description, `USAGE`, optional
+`GLOBAL OPTIONS`, grouped commands and short closing guidance. A command page contains its command
 banner, description, `USAGE`, optional `ARGUMENTS AND OPTIONS`, optional
 `NOTES`, and optional `EXAMPLES`.
 

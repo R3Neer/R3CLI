@@ -6,6 +6,7 @@ from .help import (
     HelpRequest,
     load_help_catalogue,
     resolve_help_request,
+    validate_argparse_catalogue,
 )
 from .models import CliError, ColourMode, Diagnostic, Level
 from .theme import Theme, load_theme
@@ -26,6 +27,7 @@ __all__ = [
     "load_help_catalogue",
     "load_theme",
     "resolve_help_request",
+    "validate_argparse_catalogue",
 ]
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
