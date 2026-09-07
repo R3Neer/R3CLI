@@ -60,10 +60,10 @@ jobs:
       - name: Parse packaged Nushell adapter
         shell: nu {0}
         run: |
-          cd $env.GITHUB_WORKSPACE
-          nu-check ./dist/nushell/r3cli/mod.nu
+          let adapter = ($env.GITHUB_WORKSPACE | path join 'dist/nushell/r3cli/mod.nu')
+          nu-check $adapter
       - name: Validate the packaged Nushell adapter
         shell: nu {0}
         run: |
-          cd $env.GITHUB_WORKSPACE
-          nu ./tests/Nushell.Contract.nu
+          let contract = ($env.GITHUB_WORKSPACE | path join 'tests/Nushell.Contract.nu')
+          nu $contract
