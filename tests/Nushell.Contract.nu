@@ -4,7 +4,7 @@ const ADAPTER = path self ../dist/nushell/r3cli
 const FIXTURE = path self fixtures/console-contract.json
 use $ADAPTER *
 
-def capture [action: closure] -> string {
+def capture [action: closure]: nothing -> string {
     let path = (mktemp)
     do $action o> $path
     let output = (open --raw $path)
@@ -12,11 +12,11 @@ def capture [action: closure] -> string {
     $output
 }
 
-def display-width [text: string] -> int {
+def display-width [text: string]: nothing -> int {
     ($text | ansi strip | str stats | get 'unicode-width')
 }
 
-def render-fixture [fixture: record, ascii: bool] -> string {
+def render-fixture [fixture: record, ascii: bool]: nothing -> string {
     capture {
         let ui = (console --colour never --ascii=$ascii --width $fixture.width --is-terminal=false)
         for command in $fixture.commands {
