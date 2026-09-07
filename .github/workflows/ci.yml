@@ -64,4 +64,4 @@ jobs:
           if not (nu-check $adapter) { error make { msg: 'Packaged Nushell adapter failed nu-check.' } }
       - name: Validate the packaged Nushell adapter
         shell: bash
-        run: nu --no-config-file "$GITHUB_WORKSPACE/tests/Nushell.Contract.nu"
+        run: nu -n "$GITHUB_WORKSPACE/tests/Nushell.Contract.nu"
