@@ -27,11 +27,14 @@ contains ANSI escape sequences.
 See [`docs/design-language.md`](docs/design-language.md) for the complete visual
 contract.
 
-## PowerShell consumers
+## Shell adapters
 
-R3CLI also provides an official PowerShell 7 adapter. It uses the same canonical
-palette, symbols and help contract as Python, without requiring Python at runtime.
-See [the PowerShell API and packaging guide](docs/powershell.md).
+R3CLI provides official adapters for PowerShell 7 and Nushell. Both use the same
+canonical palette, symbols and help contract as Python without requiring Python
+at runtime.
+
+- [PowerShell API and packaging guide](docs/powershell.md)
+- [Nushell API and packaging guide](docs/nushell.md)
 
 ## Maintaining R3CLI
 
@@ -52,6 +55,9 @@ API:
 ```console
 pytest
 ```
+
+Build and validate language adapters with their dedicated scripts and contract
+tests. CI checks both PowerShell and Nushell distributions.
 
 ## Licence
 

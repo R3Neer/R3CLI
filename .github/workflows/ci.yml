@@ -45,3 +45,22 @@ jobs:
           $ErrorActionPreference = 'Stop'
           Test-ModuleManifest ./dist/powershell/R3CLI/R3CLI.psd1 | Out-Null
           ./tests/PowerShell.Contract.ps1 -ModulePath ./dist/powershell/R3CLI/R3CLI.psd1
+
+  nushell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+      - uses: hustcer/setup-nu@v3
+        with:
+          version: "0.115.1"
+      - run: python scripts/build_nushell.py
+      - name: Parse packaged Nushell adapter
+        shell: nu {0}
+        run: |
+          let adapter = ($env.GITHUB_WORKSPACE | path join 'dist/nushell/r3cli/mod.nu')
+          if not (nu-check $adapter) { error make { msg: 'Packaged Nushell adapter failed nu-check.' } }
+      - name: Validate the packaged Nushell adapter
+        run: python tests/run_nushell_contract.py
