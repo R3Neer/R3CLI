@@ -126,13 +126,16 @@ def wrap-plain [text: string, width: int]: nothing -> list<string> {
 }
 
 # Construct a rendering context. `colour` follows R3CLI's auto/always/never
-# contract. `is-terminal` exists mainly for deterministic tests and embedding.
+# contract. `is-terminal` and `sink` exist mainly for deterministic tests and
+# embedding. A sink closure receives `(text, stream)` and keeps human rendering
+# out of Nushell's structured pipeline just like direct terminal output does.
 export def console [
     --colour: string = 'auto'
     --ascii
     --width: int
     --theme-extension: record = {}
     --is-terminal: any = null
+    --sink: any = null
 ]: nothing -> record {
     if $colour not-in ['auto' 'always' 'never'] {
         fail $"R3CLI.Colour.Invalid: '($colour)'."
@@ -162,6 +165,7 @@ export def console [
         width: $actual_width
         colour: $colour
         is_terminal: $is_terminal
+        sink: $sink
     }
 }
 
@@ -212,8 +216,12 @@ export def line [
         $wrapped | each {|item| styled $console $item $role $bold }
     }
 
+    let sink = (field $console 'sink')
+    let stream = if $stderr { 'stderr' } else { 'stdout' }
     for item in $rendered {
-        if $stderr {
+        if $sink != null {
+            do $sink $item $stream | ignore
+        } else if $stderr {
             if $no_newline { print --stderr --no-newline $item } else { print --stderr $item }
         } else {
             if $no_newline { print --no-newline $item } else { print $item }
