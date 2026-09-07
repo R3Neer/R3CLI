@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import unicodedata
@@ -28,6 +29,47 @@ def run_nu(*args: str) -> str:
             f"stderr:\n{process.stderr}"
         )
     return process.stdout
+
+
+def run_nu_pty(*args: str) -> str:
+    if os.name == "nt":
+        raise AssertionError("Pseudo-terminal colour regression test requires POSIX.")
+
+    import pty
+
+    master_fd, slave_fd = pty.openpty()
+    environment = os.environ.copy()
+    environment.pop("NO_COLOR", None)
+    process = subprocess.Popen(
+        ["nu", "--config", str(CONFIG), str(SCRIPT), *args],
+        cwd=ROOT,
+        stdin=subprocess.DEVNULL,
+        stdout=slave_fd,
+        stderr=slave_fd,
+        env=environment,
+    )
+    os.close(slave_fd)
+
+    chunks: list[bytes] = []
+    try:
+        while True:
+            try:
+                chunk = os.read(master_fd, 4096)
+            except OSError:
+                break
+            if not chunk:
+                break
+            chunks.append(chunk)
+    finally:
+        os.close(master_fd)
+
+    returncode = process.wait()
+    output = b"".join(chunks).decode("utf-8", errors="replace").replace("\r\n", "\n")
+    if returncode:
+        raise AssertionError(
+            f"Nushell PTY contract command failed ({returncode})\noutput:\n{output}"
+        )
+    return output
 
 
 def display_width(text: str) -> int:
@@ -61,6 +103,19 @@ def main() -> None:
 
     assertions = run_nu("--mode", "assertions")
     assert "Nushell contract assertions passed." in assertions
+
+    redirected_auto = run_nu("--mode", "auto-colour")
+    assert not ANSI_RE.search(redirected_auto), (
+        f"Auto colour leaked ANSI into redirected output: {redirected_auto!r}"
+    )
+
+    terminal_auto = run_nu_pty("--mode", "auto-colour")
+    assert ANSI_RE.search(terminal_auto), (
+        f"Auto colour was disabled for terminal output: {terminal_auto!r}"
+    )
+    assert normalized_words(terminal_auto) == normalized_words(redirected_auto), (
+        "Auto colour changed the underlying text between terminal and redirected output"
+    )
 
     for width in (30, 50, 80, 120):
         output = run_nu("--mode", "width", "--width", str(width))
