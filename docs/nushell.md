@@ -1,7 +1,7 @@
 # Nushell adapter
 
 R3CLI provides a native Nushell adapter for Nu 0.115 or newer. It implements the
-same canonical palette, symbols, wrapping rules, status hierarchy and help
+same canonical palette, symbols, responsive wrapping, status hierarchy and help
 contract as the Python and PowerShell implementations without requiring Python or
 PowerShell at runtime.
 
@@ -74,6 +74,11 @@ let ui = (console --theme-extension { client: '#123456' })
 Theme extensions must use `#RRGGBB`. Canonical roles cannot disappear; matching
 keys may be overridden by the consumer.
 
+For deterministic tests or embedding, `console` also accepts `--is-terminal` to
+override terminal detection and `--sink` to receive rendered `(text, stream)`
+values through a closure instead of printing them. Normal CLI consumers should
+usually leave both unset.
+
 ## Help catalogue
 
 The adapter accepts the language-neutral TOML shape directly:
@@ -94,4 +99,7 @@ drift.
 
 The cross-language fixture in `tests/fixtures/console-contract.json` is shared
 with the PowerShell contract. CI builds the packaged module, parses it with
-`nu-check`, then executes `tests/Nushell.Contract.nu` under Nu 0.115.1.
+`nu-check`, then runs `tests/run_nushell_contract.py`. The harness executes
+`tests/Nushell.Contract.nu` under Nu 0.115.1, captures the process output and
+checks exact ASCII/Unicode parity plus responsive rendering at several terminal
+widths.
