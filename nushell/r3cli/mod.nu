@@ -9,7 +9,7 @@ const MODULE_DIR = path self .
 
 # Load the generated package resources when present. Falling back to the
 # canonical repository sources keeps the module usable from a source checkout.
-def resources [] -> record {
+def resources []: nothing -> record {
     let packaged = ($MODULE_DIR | path join 'resources.json')
     if ($packaged | path exists) {
         open $packaged
@@ -26,38 +26,38 @@ def fail [message: string] {
     error make { msg: $message }
 }
 
-def nonempty [value: any] -> bool {
+def nonempty [value: any]: nothing -> bool {
     if $value == null { false } else { (($value | into string | str trim) != '') }
 }
 
-def text-width [text: string] -> int {
+def text-width [text: string]: nothing -> int {
     let clean = ($text | ansi strip)
     ($clean | str stats | get 'unicode-width')
 }
 
-def clean-text [value: any] -> string {
+def clean-text [value: any]: nothing -> string {
     ($value | into string | str replace --all "\u{1b}" '' | str replace --all "\r\n" "\n" | str replace --all "\t" '    ')
 }
 
-def field [value: any, name: string, default_value: any = null] -> any {
+def field [value: any, name: string, default_value: any = null] {
     if (($value | describe) !~ '^record') { return $default_value }
     let result = ($value | get --optional ($name | into cell-path))
     if $result == null { $default_value } else { $result }
 }
 
-def role-exists [console: record, role: string] -> bool {
+def role-exists [console: record, role: string]: nothing -> bool {
     $role in ($console.theme | columns)
 }
 
-def use-colour [console: record] -> bool {
+def use-colour [console: record]: nothing -> bool {
     match $console.colour {
         'always' => true
         'never' => false
         _ => {
             let no_color = (($env | get --optional NO_COLOR) != null)
             let attached = if $console.is_terminal == null {
-                # Keep this check in an `if`: `is-terminal` deliberately reports
-                # false when its own result is redirected into a pipeline/value.
+                # Keep this check directly in an `if`: `is-terminal` reports
+                # whether stdout is attached to a terminal in this context.
                 if (is-terminal --stdout) { true } else { false }
             } else {
                 $console.is_terminal
@@ -67,7 +67,7 @@ def use-colour [console: record] -> bool {
     }
 }
 
-def styled [console: record, text: string, role: any = null, bold: bool = false] -> string {
+def styled [console: record, text: string, role: any = null, bold: bool = false]: nothing -> string {
     let clean = (clean-text $text)
     if not (use-colour $console) { return $clean }
 
@@ -85,7 +85,7 @@ def styled [console: record, text: string, role: any = null, bold: bool = false]
     if $prefix == '' { $clean } else { $"($prefix)($clean)(ansi reset)" }
 }
 
-def segment-text [segment: any] -> string {
+def segment-text [segment: any]: nothing -> string {
     if (($segment | describe) == 'string') {
         clean-text $segment
     } else {
@@ -93,7 +93,7 @@ def segment-text [segment: any] -> string {
     }
 }
 
-def wrap-plain [text: string, width: int] -> list<string> {
+def wrap-plain [text: string, width: int]: nothing -> list<string> {
     let normalized = (clean-text $text)
     if (text-width $normalized) <= $width { return [$normalized] }
 
@@ -132,7 +132,7 @@ export def console [
     --width: int
     --theme-extension: record = {}
     --is-terminal: any = null
-] -> record {
+]: nothing -> record {
     if $colour not-in ['auto' 'always' 'never'] {
         fail $"R3CLI.Colour.Invalid: '($colour)'."
     }
@@ -164,7 +164,7 @@ export def console [
     }
 }
 
-export def symbol [console: record, kind: string] -> string {
+export def symbol [console: record, kind: string]: nothing -> string {
     if $kind not-in ($console.symbols | columns) {
         fail $"R3CLI.Symbol.Unknown: '($kind)'."
     }
@@ -178,7 +178,7 @@ export def line [
     segments: list<any> = []
     --no-newline
     --stderr
-] -> nothing {
+]: nothing -> nothing {
     for segment in $segments {
         if (($segment | describe) =~ '^record') {
             let role = (field $segment 'role')
@@ -195,15 +195,17 @@ export def line [
     # wrap, use the first segment's role rather than splitting styled tokens;
     # the textual contract remains exact and no content is truncated.
     let rendered = if ($wrapped | length) == 1 and ($plain !~ "\n") {
-        $segments | each {|segment|
+        let rendered_line = ($segments | each {|segment|
             if (($segment | describe) == 'string') {
                 styled $console ($segment | into string)
             } else {
                 styled $console (field $segment 'text' '') (field $segment 'role') (field $segment 'bold' false)
             }
-        } | str join '' | wrap
+        } | str join '')
+        [$rendered_line]
     } else {
-        let first_record = ($segments | where {|it| ($it | describe) =~ '^record'} | first | default {})
+        let records = ($segments | where {|it| ($it | describe) =~ '^record'})
+        let first_record = if ($records | is-empty) { {} } else { $records | first }
         let role = (field $first_record 'role')
         let bold = (field $first_record 'bold' false)
         $wrapped | each {|item| styled $console $item $role $bold }
@@ -211,14 +213,14 @@ export def line [
 
     for item in $rendered {
         if $stderr {
-            print --stderr --no-newline=$no_newline $item
+            if $no_newline { print --stderr --no-newline $item } else { print --stderr $item }
         } else {
-            print --no-newline=$no_newline $item
+            if $no_newline { print --no-newline $item } else { print $item }
         }
     }
 }
 
-export def banner [console: record, text: string] -> nothing {
+export def banner [console: record, text: string]: nothing -> nothing {
     let rule_width = ([68 $console.width] | math min)
     let rule = ('' | fill --width $rule_width --character (symbol $console banner))
     line $console
@@ -227,12 +229,12 @@ export def banner [console: record, text: string] -> nothing {
     line $console [{ text: $rule, role: secondary }]
 }
 
-export def heading [console: record, text: string] -> nothing {
+export def heading [console: record, text: string]: nothing -> nothing {
     line $console
-    line $console [{ text: ($text | str upcase), role: heading, bold: true }]
+    line $console [{ text: ($text | str uppercase), role: heading, bold: true }]
 }
 
-export def section [console: record, title: string, count: any = null] -> nothing {
+export def section [console: record, title: string, count: any = null]: nothing -> nothing {
     line $console
     mut segments = [{ text: $"  ($title)", role: heading }]
     if $count != null { $segments = ($segments | append { text: $"  ($count)", role: accent }) }
@@ -243,13 +245,13 @@ export def section [console: record, title: string, count: any = null] -> nothin
     line $console [{ text: $"  ($rule)", role: secondary }]
 }
 
-export def status [console: record, kind: string, text: string] -> nothing {
+export def status [console: record, kind: string, text: string]: nothing -> nothing {
     let role = (match $kind {
-        step => process
-        success => success
-        info => heading
-        warning => process
-        error => error
+        step => 'process'
+        success => 'success'
+        info => 'heading'
+        warning => 'process'
+        error => 'error'
         _ => { fail $"R3CLI.Status.Unknown: '($kind)'." }
     })
     let segments = [
@@ -259,7 +261,7 @@ export def status [console: record, kind: string, text: string] -> nothing {
     if $kind == 'warning' { line $console $segments --stderr } else { line $console $segments }
 }
 
-export def key-value [console: record, key: string, value: any, --width: int = 16] -> nothing {
+export def key-value [console: record, key: string, value: any, --width: int = 16]: nothing -> nothing {
     if ($console.width < 40) or (($width + 4) >= $console.width) {
         line $console [{ text: $key, role: secondary }]
         line $console [{ text: $"  ($value)", role: value }]
@@ -269,7 +271,7 @@ export def key-value [console: record, key: string, value: any, --width: int = 1
     }
 }
 
-export def table [console: record, headers: list<string>, rows: list<any>] -> nothing {
+export def table [console: record, headers: list<string>, rows: list<any>]: nothing -> nothing {
     let count = ($headers | length)
     for row in $rows {
         if (($row | length) != $count) { fail 'R3CLI.Table.InvalidRow: column count differs.' }
@@ -281,7 +283,9 @@ export def table [console: record, headers: list<string>, rows: list<any>] -> no
 
     if $width < 12 {
         for row in $rows {
-            for index in 0..<($count) { key-value $console $headers.($index) $row.($index) }
+            for index in 0..<($count) {
+                key-value $console ($headers | get $index) ($row | get $index)
+            }
             line $console
         }
         return
@@ -293,7 +297,9 @@ export def table [console: record, headers: list<string>, rows: list<any>] -> no
     for row in $rows {
         let has_long = ($row | any {|item| (text-width ($item | into string)) > $width })
         if $has_long {
-            for index in 0..<($count) { key-value $console $headers.($index) $row.($index) }
+            for index in 0..<($count) {
+                key-value $console ($headers | get $index) ($row | get $index)
+            }
         } else {
             let row_line = ($row | each {|item| ($item | into string) | fill --width $width --alignment left } | str join '  ')
             line $console [{ text: $row_line, role: value }]
@@ -301,7 +307,7 @@ export def table [console: record, headers: list<string>, rows: list<any>] -> no
     }
 }
 
-def normalize-catalogue [catalogue: record] -> record {
+def normalize-catalogue [catalogue: record]: nothing -> record {
     let nested = ($catalogue | get --optional help)
     if $nested == null {
         $catalogue
@@ -310,12 +316,12 @@ def normalize-catalogue [catalogue: record] -> record {
     }
 }
 
-def catalogue-groups [catalogue: record] -> list<any> {
+def catalogue-groups [catalogue: record]: nothing -> list<any> {
     let explicit = ($catalogue | get --optional 'group-order')
     if $explicit == null { $catalogue | get --optional groups | default [] } else { $explicit }
 }
 
-export def test-help-catalogue [catalogue: record, --executable-commands: list<string>] -> bool {
+export def test-help-catalogue [catalogue: record, --executable-commands: list<string>]: nothing -> bool {
     let catalogue = (normalize-catalogue $catalogue)
     for name in [product description invocation] {
         if not (nonempty ($catalogue | get --optional ($name | into cell-path))) {
@@ -371,7 +377,7 @@ export def test-help-catalogue [catalogue: record, --executable-commands: list<s
     true
 }
 
-def help-row [console: record, label: string, description: string, width: int] -> nothing {
+def help-row [console: record, label: string, description: string, width: int]: nothing -> nothing {
     if ($console.width < 40) or (($width + 4) >= $console.width) {
         line $console [{ text: $"  ($label)", role: accent }]
         line $console [{ text: $"    ($description)", role: secondary }]
@@ -381,7 +387,7 @@ def help-row [console: record, label: string, description: string, width: int] -
     }
 }
 
-export def help [console: record, catalogue: record, command: string = ''] -> nothing {
+export def help [console: record, catalogue: record, command: string = '']: nothing -> nothing {
     let catalogue = (normalize-catalogue $catalogue)
     test-help-catalogue $catalogue | ignore
     let commands = ($catalogue | get --optional commands | default [])
@@ -389,7 +395,7 @@ export def help [console: record, catalogue: record, command: string = ''] -> no
     let entry = if $command != '' {
         let matches = ($commands | where name == $command)
         if (($matches | length) != 1) { fail $"R3CLI.Help.UnknownCommand: '($command)'." }
-        banner $console ($command | str upcase)
+        banner $console ($command | str uppercase)
         $matches | first
     } else {
         let version = ($catalogue | get --optional version | default '')
@@ -445,15 +451,21 @@ export def format-diagnostic [
     --details: string = ''
     --hint: string = ''
     --code: string = ''
-] -> string {
-    def sentence [value: string] -> string {
+]: nothing -> string {
+    def sentence [value: string]: nothing -> string {
         let text = ($value | ansi strip | str trim)
         if $text =~ '[.!?]$' { $text } else { $"($text)." }
     }
 
     mut lines = [(sentence $message)]
-    if $code != '' { $lines = ($lines | append $"  [(($code | ansi strip | str trim))]") }
+    if $code != '' {
+        let clean_code = ($code | ansi strip | str trim)
+        $lines = ($lines | append $"  [($clean_code)]")
+    }
     if $details != '' { $lines = ($lines | append $"Details: (sentence $details)") }
-    if $hint != '' { $lines = ($lines | append $"Try: (($hint | ansi strip | str trim))") }
+    if $hint != '' {
+        let clean_hint = ($hint | ansi strip | str trim)
+        $lines = ($lines | append $"Try: ($clean_hint)")
+    }
     $lines | str join (char newline)
 }
