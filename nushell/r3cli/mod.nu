@@ -41,7 +41,7 @@ def clean-text [value: any]: nothing -> string {
 
 def field [value: any, name: string, default_value: any = null] {
     if (($value | describe) !~ '^record') { return $default_value }
-    let result = ($value | get --optional ($name | into cell-path))
+    let result = ($value | get --optional $name)
     if $result == null { $default_value } else { $result }
 }
 
@@ -78,7 +78,8 @@ def styled [console: record, text: string, role: any = null, bold: bool = false]
     let prefix = if $role == null {
         if $bold { ansi bo } else { '' }
     } else {
-        let colour = ($console.theme | get (($role | into string) | into cell-path))
+        let role_name = ($role | into string)
+        let colour = ($console.theme | get $role_name)
         if $bold { ansi { fg: $colour, attr: b } } else { ansi $colour }
     }
 
@@ -168,7 +169,7 @@ export def symbol [console: record, kind: string]: nothing -> string {
     if $kind not-in ($console.symbols | columns) {
         fail $"R3CLI.Symbol.Unknown: '($kind)'."
     }
-    let values = ($console.symbols | get ($kind | into cell-path))
+    let values = ($console.symbols | get $kind)
     if $console.ascii { $values.1 } else { $values.0 }
 }
 
@@ -324,7 +325,7 @@ def catalogue-groups [catalogue: record]: nothing -> list<any> {
 export def test-help-catalogue [catalogue: record, --executable-commands: list<string>]: nothing -> bool {
     let catalogue = (normalize-catalogue $catalogue)
     for name in [product description invocation] {
-        if not (nonempty ($catalogue | get --optional ($name | into cell-path))) {
+        if not (nonempty ($catalogue | get --optional $name)) {
             fail $"R3CLI.Help.Invalid: ($name) is empty."
         }
     }
@@ -348,7 +349,7 @@ export def test-help-catalogue [catalogue: record, --executable-commands: list<s
         let group = ($command | get --optional group)
         if $group not-in $groups { fail $"R3CLI.Help.Invalid: unknown group for '($name)'." }
         for required in [summary description usage] {
-            let values = ($command | get --optional ($required | into cell-path) | default [])
+            let values = ($command | get --optional $required | default [])
             let values = if (($values | describe) =~ '^list') { $values } else { [$values] }
             if (($values | length) == 0) or ($values | any {|it| not (nonempty $it) }) {
                 fail $"R3CLI.Help.Invalid: missing ($required) for '($name)'."
