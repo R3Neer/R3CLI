@@ -17,6 +17,14 @@ def render-fixture [ascii: bool] {
     }
 }
 
+def render-auto-colour [] {
+    let ui = (console --colour auto --width 80)
+    line $ui [
+        { text: 'AUTO ', role: heading, bold: true }
+        { text: 'ACCENT', role: accent }
+    ]
+}
+
 def sample-catalogue []: nothing -> record {
     {
         product: TOOL
@@ -79,6 +87,7 @@ def main [
     match $mode {
         'fixture-ascii' => { render-fixture true }
         'fixture-unicode' => { render-fixture false }
+        'auto-colour' => { render-auto-colour }
         'width' => { render-width $width }
         'assertions' => { run-assertions }
         _ => { error make { msg: $"Unknown contract mode: ($mode)" } }
