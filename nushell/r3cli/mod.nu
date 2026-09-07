@@ -49,25 +49,15 @@ def role-exists [console: record, role: string]: nothing -> bool {
     $role in ($console.theme | columns)
 }
 
-def use-colour [console: record]: nothing -> bool {
-    match $console.colour {
-        'always' => true
-        'never' => false
-        _ => {
-            let no_color = (($env | get --optional NO_COLOR) != null)
-            let attached = if $console.is_terminal == null {
-                if (is-terminal --stdout) { true } else { false }
-            } else {
-                $console.is_terminal
-            }
-            $attached and (not $no_color)
-        }
-    }
-}
-
-def styled [console: record, text: string, role: any = null, bold: bool = false]: nothing -> string {
+def styled [
+    console: record
+    use_colour: bool
+    text: string
+    role: any = null
+    bold: bool = false
+]: nothing -> string {
     let clean = (clean-text $text)
-    if not (use-colour $console) { return $clean }
+    if not $use_colour { return $clean }
 
     if ($role != null) and (not (role-exists $console ($role | into string))) {
         fail $"R3CLI.Theme.UnknownRole: '($role)'."
@@ -192,15 +182,34 @@ export def line [
         }
     }
 
+    # Nushell 0.114+ makes `is-terminal` redirection-aware. Detect at the
+    # emission boundary; calling it inside `styled`, whose result is collected
+    # by `each`, incorrectly reports redirected output and disables auto colour.
+    let use_colour = match $console.colour {
+        'always' => true
+        'never' => false
+        _ => {
+            if (($env | get --optional NO_COLOR) != null) {
+                false
+            } else if $console.is_terminal != null {
+                $console.is_terminal
+            } else if $stderr {
+                if (is-terminal --stderr) { true } else { false }
+            } else {
+                if (is-terminal --stdout) { true } else { false }
+            }
+        }
+    }
+
     let plain = ($segments | each {|segment| segment-text $segment } | str join '')
     let wrapped = (wrap-plain $plain $console.width)
 
     let rendered = if ($wrapped | length) == 1 and ($plain !~ "\n") {
         let rendered_line = ($segments | each {|segment|
             if (($segment | describe) == 'string') {
-                styled $console ($segment | into string)
+                styled $console $use_colour ($segment | into string)
             } else {
-                styled $console (field $segment 'text' '') (field $segment 'role') (field $segment 'bold' false)
+                styled $console $use_colour (field $segment 'text' '') (field $segment 'role') (field $segment 'bold' false)
             }
         } | str join '')
         [$rendered_line]
@@ -209,7 +218,7 @@ export def line [
         let first_record = if ($records | is-empty) { {} } else { $records | first }
         let role = (field $first_record 'role')
         let bold = (field $first_record 'bold' false)
-        $wrapped | each {|item| styled $console $item $role $bold }
+        $wrapped | each {|item| styled $console $use_colour $item $role $bold }
     }
 
     let sink = (field $console 'sink')
