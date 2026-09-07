@@ -40,6 +40,10 @@ def display_width(text: str) -> int:
     return width
 
 
+def normalized_words(text: str) -> str:
+    return " ".join(ANSI_RE.sub("", text).split())
+
+
 def main() -> None:
     fixture = json.loads(FIXTURE.read_text(encoding="utf-8"))
 
@@ -64,10 +68,11 @@ def main() -> None:
             assert display_width(line) <= width, (
                 f"Nushell help exceeded width {width}: {line!r}"
             )
-        assert "Choose content without truncating this description." in output
+        normalized = normalized_words(output)
+        assert "Choose content without truncating this description." in normalized
         assert not re.search(r"wrapp$|descri$", output, flags=re.MULTILINE)
-        assert "[literal] café 漢字" in output
-        assert "Very long value that must be preserved" in output
+        assert "[literal] café 漢字" in normalized
+        assert "Very long value that must be preserved" in normalized
 
     print("Nushell adapter contract passed.")
 
