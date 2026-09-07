@@ -59,7 +59,11 @@ jobs:
       - run: python scripts/build_nushell.py
       - name: Parse packaged Nushell adapter
         shell: nu {0}
-        run: nu-check ./dist/nushell/r3cli/mod.nu
+        run: |
+          cd $env.GITHUB_WORKSPACE
+          nu-check ./dist/nushell/r3cli/mod.nu
       - name: Validate the packaged Nushell adapter
         shell: nu {0}
-        run: nu ./tests/Nushell.Contract.nu
+        run: |
+          cd $env.GITHUB_WORKSPACE
+          nu ./tests/Nushell.Contract.nu
