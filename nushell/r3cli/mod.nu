@@ -56,8 +56,6 @@ def use-colour [console: record]: nothing -> bool {
         _ => {
             let no_color = (($env | get --optional NO_COLOR) != null)
             let attached = if $console.is_terminal == null {
-                # Keep this check directly in an `if`: `is-terminal` reports
-                # whether stdout is attached to a terminal in this context.
                 if (is-terminal --stdout) { true } else { false }
             } else {
                 $console.is_terminal
@@ -179,7 +177,6 @@ export def symbol [console: record, kind: string]: nothing -> string {
     if $console.ascii { $values.1 } else { $values.0 }
 }
 
-# Print human text without returning it into Nushell's structured pipeline.
 export def line [
     console: record
     segments: list<any> = []
@@ -198,9 +195,6 @@ export def line [
     let plain = ($segments | each {|segment| segment-text $segment } | str join '')
     let wrapped = (wrap-plain $plain $console.width)
 
-    # Preserve per-segment colour on ordinary unwrapped lines. When a line must
-    # wrap, use the first segment's role rather than splitting styled tokens;
-    # the textual contract remains exact and no content is truncated.
     let rendered = if ($wrapped | length) == 1 and ($plain !~ "\n") {
         let rendered_line = ($segments | each {|segment|
             if (($segment | describe) == 'string') {
@@ -273,12 +267,14 @@ export def status [console: record, kind: string, text: string]: nothing -> noth
 }
 
 export def key-value [console: record, key: string, value: any, --width: int = 16]: nothing -> nothing {
-    if ($console.width < 40) or (($width + 4) >= $console.width) {
+    let value_text = ($value | into string)
+    let inline_width = ($width + 1 + (text-width $value_text))
+    if ($console.width < 40) or (($width + 4) >= $console.width) or ($inline_width > $console.width) {
         line $console [{ text: $key, role: secondary }]
-        line $console [{ text: $"  ($value)", role: value }]
+        line $console [{ text: $"  ($value_text)", role: value }]
     } else {
         let padded = ($key | fill --width $width --alignment left)
-        line $console [{ text: $"($padded) ", role: secondary } { text: ($value | into string), role: value }]
+        line $console [{ text: $"($padded) ", role: secondary } { text: $value_text, role: value }]
     }
 }
 
