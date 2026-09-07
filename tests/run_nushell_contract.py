@@ -66,13 +66,21 @@ def main() -> None:
         output = run_nu("--mode", "width", "--width", str(width))
         for line in output.splitlines():
             assert display_width(line) <= width, (
-                f"Nushell help exceeded width {width}: {line!r}"
+                f"Nushell help exceeded width {width}: {line!r}\n{output!r}"
             )
         normalized = normalized_words(output)
-        assert "Choose content without truncating this description." in normalized
-        assert not re.search(r"wrapp$|descri$", output, flags=re.MULTILINE)
-        assert "[literal] café 漢字" in normalized
-        assert "Very long value that must be preserved" in normalized
+        assert "Choose content without truncating this description." in normalized, (
+            f"Help lost item description at width {width}: {output!r}"
+        )
+        assert not re.search(r"wrapp$|descri$", output, flags=re.MULTILINE), (
+            f"Help split a complete word at width {width}: {output!r}"
+        )
+        assert "[literal] café 漢字" in normalized, (
+            f"Literal text changed at width {width}: {output!r}"
+        )
+        assert "Very long value that must be preserved" in normalized, (
+            f"Table lost content at width {width}: {output!r}"
+        )
 
     print("Nushell adapter contract passed.")
 
