@@ -108,7 +108,9 @@ def wrap-plain [text: string, width: int]: nothing -> list<string> {
         let indent_match = ($paragraph | parse --regex '^(?<indent>\s*)' | first)
         let indent = ($indent_match | get --optional indent | default '')
         let body = ($paragraph | str trim --left)
-        let words = ($body | split words)
+        # `split words` tokenizes punctuation away. R3CLI wrapping must preserve
+        # every non-whitespace token verbatim, including periods and brackets.
+        let words = ($body | parse --regex '(?<word>\S+)' | get word)
         mut current = $indent
 
         for word in $words {
