@@ -63,8 +63,4 @@ jobs:
           let adapter = ($env.GITHUB_WORKSPACE | path join 'dist/nushell/r3cli/mod.nu')
           if not (nu-check $adapter) { error make { msg: 'Packaged Nushell adapter failed nu-check.' } }
       - name: Validate the packaged Nushell adapter
-        shell: nu {0}
-        run: |
-          $env.config.hooks.display_output = null
-          source ${{ github.workspace }}/tests/Nushell.Contract.nu
-          main
+        run: python tests/run_nushell_contract.py
