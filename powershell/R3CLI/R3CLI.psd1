@@ -1,6 +1,6 @@
 @{
     RootModule = 'R3CLI.psm1'
-    ModuleVersion = '0.4.1'
+    ModuleVersion = '0.5.0'
     GUID = '76d75e68-14c7-4de8-b47b-c5b31fa7f9c7'
     Author = 'R3Neer'
     Description = 'The R3CLI visual language for PowerShell consumers.'
