@@ -253,6 +253,8 @@ After changing renderers, resources, help contracts or shell adapters, also buil
 
 The project currently supports Python 3.11 through 3.14 and targets PowerShell 7 and Nushell 0.115+ for the official shell adapters.
 
+For package build, wheel verification, and PyPI release steps, see [`docs/python-release.md`](docs/python-release.md).
+
 ## Documentation
 
 - [`docs/design-language.md`](docs/design-language.md) — visual semantics and accessibility contract;
