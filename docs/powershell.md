@@ -17,7 +17,6 @@ unreleased changes from an existing release of the same version.
 ```powershell
 Import-Module ./dist/powershell/R3CLI/R3CLI.psd1
 $ui = New-R3Console -Colour auto -ThemeExtension @{ client = '#748FFC' }
-Write-R3Banner $ui 'MY TOOL'
 Write-R3Status $ui step 'Reading the project'
 Write-R3Line $ui @(@{Text='[C] ';Role='client'}, @{Text='Example';Role='value';Bold=$true})
 Write-R3Status $ui success 'Ready.'

@@ -14,7 +14,12 @@ belong in consumer themes rather than the universal palette.
 
 ## Composition
 
-- A banner uses a double horizontal rule and one bold product title.
+- Normal command output starts with its result, subject or status. Do not add a
+  banner that only repeats the tool or command name; the invocation already
+  supplies that context. Keep headings for distinct sections of a longer result.
+- A banner is optional when its title adds information the output would otherwise
+  lack. It uses a double horizontal rule and one bold title. Help pages follow
+  the separate help presentation contract.
 - Help uses uppercase section names, indented command rows and aligned labels.
   Its catalogue, routing and detailed page contract are specified in
   [`help-system.md`](help-system.md).

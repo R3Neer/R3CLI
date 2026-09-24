@@ -26,7 +26,6 @@ commands under the `r3cli` namespace:
 use ./dist/nushell/r3cli
 
 let ui = (r3cli console)
-r3cli banner $ui 'MY TOOL 1.0'
 r3cli status $ui step 'Reading the project'
 r3cli status $ui success 'Project is ready.'
 ```

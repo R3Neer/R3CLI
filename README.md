@@ -26,7 +26,7 @@ The design originated in ModpackTools and was extracted so other tools can reuse
 
 R3CLI is deliberately small. It is responsible for:
 
-- banners, headings, sections and readable spacing;
+- optional banners, headings, sections and readable spacing;
 - semantic status messages;
 - key/value layouts and compact tables;
 - consistent symbols with ASCII fallbacks;
@@ -72,7 +72,6 @@ Then use semantic UI operations:
 from r3_cli import ConsoleUI
 
 ui = ConsoleUI()
-ui.banner("MY TOOL 1.0")
 ui.step("Reading the project")
 ui.success("Project is ready.")
 ```
@@ -150,7 +149,6 @@ R3CLI includes an official native Nushell adapter for Nu 0.115+.
 use ./nushell/r3cli
 
 let ui = (r3cli console --colour auto)
-r3cli banner $ui 'MY TOOL 1.0'
 r3cli status $ui step 'Reading project'
 r3cli key-value $ui 'Version' '1.0.0'
 ```
