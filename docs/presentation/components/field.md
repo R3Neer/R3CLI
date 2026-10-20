@@ -9,9 +9,12 @@ A compact textual label/value pair. Scalar wrappers are unnecessary for this pre
 ## Usage
 
 ```csharp
+var dotted = new TabLeader(14, new Symbol("."));
 Output.Show(
     new Field("Project", "demo"),
-    new Field("Files", "12"));
+    new Field("Files", "12"),
+    new Field("Project", "demo", dotted),
+    new Field("Files", "12", dotted));
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -23,19 +26,28 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public sealed class Field : IComponent
 {
-    public Field(string label, string value);
+    public Field(string label, string value, TabLeader? separator = null);
     public string Label { get; }
     public string Value { get; }
+    public TabLeader? Separator { get; }
 }
 ```
 
 ## Composition
 
-Composes a secondary label and colon followed by normal text. Values here are textual; use Table or an application data model to retain typed domain values.
+Composes a secondary label and separator followed by normal text. Omission of separator produces the ordinary colon and space. An explicit TabLeader replaces that complete colon-and-space sequence. Values here are textual; use Table or an application data model to retain typed domain values.
+
+```mermaid
+classDiagram
+    IComponent <|.. Field
+    Field --> TabLeader : optional separator
+    IInlineContent <|.. TabLeader
+    TabLeader --> Symbol : optional pattern
+```
 
 ## Behavior and validation
 
-Label and value are non-null single logical lines with well-formed Unicode and no controls. Do not parse values or infer commands. The value is a string, not a new Scalar type.
+Label and value are non-null single logical lines with well-formed Unicode and no controls. Do not parse values or infer commands. The value is a string, not a new Scalar type. A supplied TabLeader must satisfy its width and optional-Symbol invariants; default(TabLeader) is valid and adds a space, whereas an explicitly supplied default(Symbol) is invalid. There is no independent Field labelWidth option.
 
 ## Presentation
 
@@ -45,12 +57,12 @@ The preview shows the semantic arrangement. Browser rendering is illustrative; i
 
 | Part | Token |
 |---|---|
-| Label and colon | `subtext.foreground` |
+| Label and separator | `subtext.foreground` |
 | Value | `text.foreground` |
 
 ### Layout
 
-No lower gap between fields. A single logical line may wrap physically; reduce indentation before hiding content.
+An omitted separator renders Label: Value. With TabLeader, measure the complete logical prefix before the value and exclude enclosing structural indentation. The target is not a fixed number of dots. No lower gap between fields. A single logical line may wrap physically; reduce indentation before hiding content.
 
 Shared wrapping, Unicode and control handling are defined in [[docs/presentation/text-and-layout|Text and layout]]. Automatic margins collapse by maximum; explicit [[docs/presentation/components/blank-line|BlankLine]] remains additional content.
 
@@ -63,7 +75,10 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
+var dotted = new TabLeader(14, new Symbol("."));
 Output.Show(
     new Field("Project", "demo"),
-    new Field("Files", "12"));
+    new Field("Files", "12"),
+    new Field("Project", "demo", dotted),
+    new Field("Files", "12", dotted));
 ```

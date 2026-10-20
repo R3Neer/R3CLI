@@ -56,8 +56,9 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
 
     var table = new Table(
         [new Row("demo", 12), new Row("test", 3)],
-        new Column("Name", index: 0),
-        new Column("Files", index: 1));
+        ["Name", "Files"]);
+
+    var leader = new TabLeader(12, new Symbol("."));
 
     var tree = Tree.From(categories,
         children: category => category.Children,
@@ -95,6 +96,12 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
                 new Field("Files", "12"),
                 new Section("Validation", new Success("Checks passed.")))),
         new LiteralBlock("Name    Status\ndemo    ready"),
+        new Section("Aligned fields",
+            new Field("Name", "demo", leader),
+            new Field("Files", "12", leader),
+            new Line(new Text("Note"),
+                new TabLeader(12, new Symbol("_-\\_")),
+                new Text("Local"))),
         table,
         tree,
         new Diagnostic(DiagnosticLevel.Warning,
@@ -122,5 +129,7 @@ public sealed record Category(string Name, int Count, Category[] Children);
 ```
 
 The code includes literal examples of Info, Success, Warning, Failure and static Activity rather than recolouring arbitrary strings. Title has its own colour. Separator patterns and tree branches use Subtext's token. The LiteralBlock is compact and separated from following content. The nested Section branch demonstrates `═`, `─`, then `-`.
+
+The compact Table constructor maps header strings to positional Columns without changing Row or hiding unselected data. TabLeader targets a logical line-prefix width in terminal cells. Explicit Field leaders replace the default colon and gap; the same inline value can align a Line. The underscores/backslash pattern is literal Symbol content, not an escape language interpreted by R3CLI.
 
 Help is generated from the supplied command, not hand-constructed. Its content has no Banner. View updates replace the metadata region without producing new automatic blank lines per frame. The static capture freezes the initial state; the browser fixture can display the explicit progress replacement.

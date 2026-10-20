@@ -11,7 +11,7 @@ A colour token names the role of a visible part. Standard components select thei
 | Token | Uses |
 |---|---|
 | `text.foreground` | Main text, normal message bodies, completed progress and literal-block text |
-| `subtext.foreground` | Secondary text, Field labels and colons, Section counters, table headers, separators, tree connectors, pending progress and syntax delimiters |
+| `subtext.foreground` | Secondary text, Field labels/default colons, TabLeader fill, Section counters, table headers, separators, tree connectors, pending progress and syntax delimiters |
 | `title.foreground` | Title, including Section and Banner titles |
 | `accent.foreground` | Command, help option names, Info and Activity indicators, Spinner |
 | `success.symbol.foreground` | Success and successful-task indicators |
@@ -20,6 +20,8 @@ A colour token names the role of a visible part. Standard components select thei
 | `literal-block.background` | LiteralBlock rectangle, including horizontal padding |
 
 Title retains its own colour role. Line, View, whitespace and Symbol itself own no colour tokens. A Symbol acquires its role from the component using it.
+
+[[docs/presentation/components/tab-leader|TabLeader]] reuses `subtext.foreground` for its optional visible fill; it adds no ninth token. An explicit Field separator replaces the normal colon and space, while an omitted separator keeps them.
 
 ## Example
 

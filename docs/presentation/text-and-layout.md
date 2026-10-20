@@ -68,6 +68,10 @@ Section root with nested sections uses ═; level two and a flat root use ─; l
 
 Tree uses one consistent light box-drawing family: │, ─, ├ and └. Each normal level occupies four cells; retain ancestor continuations on wrapped node lines. Unicode/ASCII selection changes characters without changing the underlying structure.
 
+## Alignment padding
+
+[[docs/presentation/components/tab-leader|TabLeader]] measures the complete preceding logical prefix in cells, excluding structural indentation. It fills to a target using spaces or whole fitting pattern graphemes, then fills leftover cells with spaces. Reaching or exceeding the target adds at least one ordinary space. Padding, including trailing spaces, is retained; only Separator uses generated-rule trailing-space trimming. A TabLeader can be inline inside Line or supplied as the separator of Field.
+
 ## Configuration boundary
 
 [[docs/configuration/toml|TOML]] owns colour, character and motion preferences and complete-response spacing. There are no per-component margin, indentation, bar-width, padding or frame-cadence settings in the initial schema.

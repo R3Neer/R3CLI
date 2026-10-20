@@ -22,15 +22,10 @@ Constructing the description does not print. `Show` is the explicit output bound
 These are API extracts, not implementation bodies or a compiling source file.
 
 ```csharp
-public readonly struct Symbol : IEquatable<Symbol>
+public readonly record struct Symbol
 {
     public Symbol(string value);
     public string Value { get; }
-    public bool Equals(Symbol other);
-    public override bool Equals(object? obj);
-    public override int GetHashCode();
-    public static bool operator ==(Symbol left, Symbol right);
-    public static bool operator !=(Symbol left, Symbol right);
 }
 ```
 
@@ -40,7 +35,7 @@ Symbol stores a pattern, not colour, width, a clock, owning component or fallbac
 
 ## Behavior and validation
 
-Value is nonempty, single-line well-formed Unicode. Reject controls, bidi controls, leading spaces, all-space patterns and isolated invisible graphemes. Ordinary spaces inside or after a visible pattern are allowed. Equality is ordinal on the original string. default(Symbol) is invalid: reading Value fails, and consumers reject it at their boundary. Valid construction does not guarantee a font contains every glyph.
+Value is nonempty, single-line well-formed Unicode. Reject controls, bidi controls, leading spaces, all-space patterns and isolated invisible graphemes. Ordinary spaces inside or after a visible pattern are allowed. The readonly record struct supplies generated value equality and hashing, with ordinal equality on the original string. Constructor validation and the get-only property prevent init/with mutation from bypassing validation. default(Symbol) is invalid: reading Value throws InvalidOperationException, and consumers reject it with ArgumentException at their boundary. Two invalid defaults can compare equal without becoming usable. Valid construction does not guarantee a font contains every glyph.
 
 ## Presentation
 
@@ -52,7 +47,7 @@ This type owns no colour token and has no child components.
 
 ### Layout
 
-Owners repeat only whole fitting graphemes. A last pattern cycle may be partial. Remove trailing generated ordinary spaces without changing Value. Width measurement belongs to layout, never string.Length.
+Owners repeat only whole fitting graphemes. A last pattern cycle may be partial. Separator removes trailing generated ordinary spaces without changing Value. TabLeader instead preserves its complete padding, including trailing spaces. Width measurement belongs to layout, never string.Length.
 
 Shared wrapping, Unicode and control handling are defined in [[docs/presentation/text-and-layout|Text and layout]]. Automatic margins collapse by maximum; explicit [[docs/presentation/components/blank-line|BlankLine]] remains additional content.
 

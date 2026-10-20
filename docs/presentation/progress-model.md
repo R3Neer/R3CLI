@@ -18,7 +18,7 @@ public enum TaskState
     Pending, Running, Succeeded, Failed, Cancelled
 }
 
-public readonly struct TaskProgress
+public readonly record struct TaskProgress
 {
     public TaskProgress(long completed, long? total = null, string? unit = null);
     public long Completed { get; }
@@ -55,7 +55,7 @@ classDiagram
 
 ## Rules
 
-Counts are nonnegative. Completed cannot exceed a known Total; null means unknown total. Zero/zero represents an empty workload at 100 percent, without implying success. default(TaskProgress) is valid unknown progress. A unit is absent when null; an explicit blank unit is invalid. Replacement counts may decrease and are not silently clamped.
+TaskProgress is an immutable readonly record struct with generated value equality. Its explicit constructor validates Completed, Total and Unit together; get-only properties expose no init path for invalid with-expressions. Counts are nonnegative. Completed cannot exceed a known Total; null means unknown total. Zero/zero represents an empty workload at 100 percent, without implying success. default(TaskProgress) is valid unknown progress. A unit is absent when null; an explicit blank unit is invalid. Replacement counts may decrease and are not silently clamped.
 
 Only Running animates. ActivityDisplay needs no total; ProgressDisplay requires a known one. Reaching the total, assigning a Diagnostic or closing the view does not change State. StagesDisplay does not schedule steps or weight them equally.
 

@@ -28,7 +28,10 @@ public sealed record TimedFrames : FrameSource
     public TimedFrames(int intervalMs = 100);
     public int IntervalMs { get; }
 }
-public sealed record SelectedFrame(int Index) : FrameSource;
+public sealed record SelectedFrame(int Index) : FrameSource
+{
+    public int Index { get; }
+}
 
 public sealed class Spinner : IInlineContent
 {
@@ -53,7 +56,9 @@ classDiagram
 
 ## Behavior and validation
 
-Frames are a nonempty captured sequence of one visible grapheme each, without spaces. Reserve maximum frame width. TimedFrames interval is a positive integer in milliseconds, default 100; zero is invalid. Selected indices must be in range. Default source is timed; unsupported Unicode uses the owner ASCII sequence.
+Frames are a nonempty captured sequence of one visible grapheme each, without spaces. Reserve maximum frame width. TimedFrames interval is a positive integer in milliseconds, default 100; zero is invalid. The SelectedFrame constructor retains its accepted named argument Index. SelectedFrame rejects negative indices at construction; Spinner validates the upper bound against its frame count. TimedFrames and SelectedFrame are sealed records with explicit validated constructors and get-only properties: no init/with mutation may bypass their invariants. Default source is timed; unsupported Unicode uses the owner ASCII sequence.
+
+SelectedFrame retains positional deconstruction and the `Index` named argument. Its explicitly declared get-only positional property is initialized from the validated input; the contract extract omits that initialization and validation body. Positional notation does not permit replacing Index through `with`.
 
 ## Presentation
 

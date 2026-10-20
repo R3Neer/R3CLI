@@ -16,12 +16,11 @@ Constructing the description does not print. `Show` is the explicit output bound
 
 ## API contract
 
-These are API extracts, not implementation bodies or a compiling source file.
+These are API extracts, not implementation bodies or a compiling source file. The primary constructor preserves the public camelCase value parameter; TextBase validates and retains it through the get-only Value property.
 
 ```csharp
-public sealed class Command : TextBase, IInlineContent
+public sealed class Command(string value) : TextBase(value), IInlineContent
 {
-    public Command(string value);
     // Value is inherited from TextBase.
 }
 ```

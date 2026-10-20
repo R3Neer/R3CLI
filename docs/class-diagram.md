@@ -37,7 +37,14 @@ classDiagram
     IComponent <|.. Line
     Line o-- IInlineContent
     IComponent <|.. BlankLine
-    class Symbol { <<struct>> }
+    class Symbol { <<readonly record struct>> }
+    class TabLeader {
+        <<readonly record struct>>
+        +int Width
+        +Symbol? Symbol
+    }
+    IInlineContent <|.. TabLeader
+    TabLeader --> Symbol : optional fill
     IComponent <|.. Separator
     Separator --> Symbol
     class SymbolTextBase { <<abstract>> }
@@ -49,6 +56,7 @@ classDiagram
     SymbolTextBase <|-- Failure
     SymbolTextBase <|-- Activity
     IComponent <|.. Field
+    Field --> TabLeader : optional separator
     IComponent <|.. Section
     Section o-- IComponent
     IComponent <|.. Banner
@@ -94,7 +102,9 @@ classDiagram
     IInlineContent <|.. Spinner
     Spinner --> Symbol : frames
     Spinner --> FrameSource
-    class FrameSource { <<abstract>> }
+    class FrameSource { <<abstract record>> }
+    class TimedFrames { <<sealed record>> }
+    class SelectedFrame { <<sealed record>> }
     FrameSource <|-- TimedFrames
     FrameSource <|-- SelectedFrame
     IComponent <|.. ProgressBar
@@ -106,12 +116,14 @@ classDiagram
     TaskDisplay <|-- ActivityDisplay
     TaskDisplay <|-- ProgressDisplay
     ProgressDisplay --> TaskProgress
+    class TaskProgress { <<readonly record struct>> }
     IComponent <|.. StagesDisplay
     StagesDisplay o-- View : stage regions
     StagesDisplay ..> TaskDisplay : initial stages
     CliNode --> CliNode : declared Parent
     CliNode ..> Help : GetHelp
     CliNode --> CommandActivity : optional override
+    class CommandActivity { <<readonly record struct>> }
 ```
 
 ## Example

@@ -9,12 +9,13 @@ A row-oriented data view. Row preserves values; Column selects and presents a va
 ## Usage
 
 ```csharp
-var table = new Table(
-    [new Row("README.md", 2048L), new Row("main.cs", 1024L)],
+Row[] rows = [new Row("README.md", 2048L), new Row("main.cs", 1024L)];
+var detailed = new Table(rows,
     new Column("Name", index: 0),
     Column.For<long>("Size", index: 1,
         presentation: bytes => new Subtext($"{bytes / 1024} KiB")));
-table.Show();
+var compact = new Table(rows, ["Name", "Bytes"]);
+Output.Show(detailed, compact);
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -50,23 +51,20 @@ public sealed class Column
     public int? Index { get; }
     public string? Field { get; }
     public Func<object?, IInlineContent>? Presentation { get; }
-    internal object? ReadValue(Row row);
-    internal IInlineContent CreateCell(Row row);
 }
 
 public sealed class Table : IComponent
 {
     public Table(IEnumerable<Row> rows, params Column[] columns);
+    public Table(IEnumerable<Row> rows, IEnumerable<string> columns);
     public IReadOnlyList<Row> Rows { get; }
     public IReadOnlyList<Column> Columns { get; }
-    internal void Validate();
-    internal IInlineContent GetCell(int rowIndex, int columnIndex);
 }
 ```
 
 ## Composition
 
-Rows are data and columns are selectors, not separate lists of cells. Header is mandatory. A column selects exactly one field or index, established by its constructor. The internal ReadValue and CreateCell seams separate lookup from visual representation; sealed types require no protected API.
+Rows are data and columns are selectors, not separate lists of cells. Header is mandatory. A column selects exactly one field or index, established by its constructor. The string-column constructor maps each mandatory header to its zero-based positional column, using the same access and validation as an explicit Column(header, index). Rows are the first parameter in both overloads. Internal lookup, validation and cell-layout helper methods are implementation choices, not fixed API contracts; sealed types require no protected API.
 
 ```mermaid
 classDiagram
@@ -79,7 +77,7 @@ classDiagram
 
 ## Behavior and validation
 
-Snapshot input containers without promising arbitrary deep cloning. Named fields compare exactly; missing differs from null. Validate absent fields/indices and type compatibility before output, reporting row and column. For<TValue> returns an ordinary Column. Do not parse numeric strings or silently convert types. Nullable value types allow null; reference annotations do not create a distinct runtime type. Evaluate presentation once per cell snapshot and reuse it for layout.
+Snapshot input containers without promising arbitrary deep cloning. Both Table constructors use identical row validation. Positional columns also work on named Row values in their captured order. Rows need every selected index or field, but may contain additional unselected values; do not require an exact row length equal to the displayed column count. Named fields compare exactly; missing differs from null. Validate absent fields/indices and type compatibility before output, reporting row and column. For<TValue> returns an ordinary Column. Do not parse numeric strings or silently convert types. Nullable value types allow null; reference annotations do not create a distinct runtime type. Evaluate presentation once per cell snapshot and reuse it for layout.
 
 ## Presentation
 
@@ -108,12 +106,13 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
-var table = new Table(
-    [new Row("README.md", 2048L), new Row("main.cs", 1024L)],
+Row[] rows = [new Row("README.md", 2048L), new Row("main.cs", 1024L)];
+var detailed = new Table(rows,
     new Column("Name", index: 0),
     Column.For<long>("Size", index: 1,
         presentation: bytes => new Subtext($"{bytes / 1024} KiB")));
-table.Show();
+var compact = new Table(rows, ["Name", "Bytes"]);
+Output.Show(detailed, compact);
 ```
 
 ## Structured data
@@ -134,3 +133,14 @@ var namedTable = new Table([row],
     new Column("Name", field: "name"),
     new Column("Files", field: "files"));
 ```
+
+## Additional examples
+
+Use a typed empty collection when intentionally choosing an empty column set. A bare [] or null is ambiguous between the two overloads; a typed null still fails validation.
+
+```csharp
+var noExplicitColumns = new Table(rows, Array.Empty<Column>());
+var noStringColumns = new Table(rows, Array.Empty<string>());
+```
+
+The overload does not discard row values. Empty columns mean an empty visible projection; original rows remain available through Rows. Selecting a subset of columns likewise keeps unselected values.

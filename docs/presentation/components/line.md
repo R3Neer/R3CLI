@@ -31,7 +31,7 @@ public sealed class Line : IComponent
 
 ## Composition
 
-Items must implement IInlineContent. Text, Subtext, Command and supported inline syntax pieces qualify. Line itself is not IInlineContent. BlankLine, Title, Section and standard messages cannot be inserted.
+Items must implement IInlineContent. Text, Subtext, Command, Spinner, TabLeader and supported inline syntax pieces qualify. Line itself is not IInlineContent. BlankLine, Title, Section and standard messages cannot be inserted.
 
 ## Behavior and validation
 

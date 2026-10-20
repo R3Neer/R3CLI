@@ -19,7 +19,7 @@ Presentation Components describe terminal output without printing during constru
 
 #### Text and composition
 
-[[docs/presentation/components/text|Text]] · [[docs/presentation/components/subtext|Subtext]] · [[docs/presentation/components/title|Title]] · [[docs/presentation/components/command|Command]] · [[docs/presentation/components/line|Line]] · [[docs/presentation/components/blank-line|BlankLine]] · [[docs/presentation/components/symbol|Symbol]] · [[docs/presentation/components/separator|Separator]]
+[[docs/presentation/components/text|Text]] · [[docs/presentation/components/subtext|Subtext]] · [[docs/presentation/components/title|Title]] · [[docs/presentation/components/command|Command]] · [[docs/presentation/components/line|Line]] · [[docs/presentation/components/blank-line|BlankLine]] · [[docs/presentation/components/symbol|Symbol]] · [[docs/presentation/components/tab-leader|TabLeader]] · [[docs/presentation/components/separator|Separator]]
 
 #### Messages and organization
 

@@ -24,6 +24,8 @@ public readonly record struct CommandActivity(
     int? AfterMs,
     string? Message = null)
 {
+    public int? AfterMs { get; }
+    public string? Message { get; }
     public static CommandActivity Disabled => new(null);
 }
 
@@ -39,6 +41,8 @@ public virtual CommandActivity? Activity => null;
 | `new CommandActivity(800, "Resolving dependencies")` | Enable with a supplied message |
 
 The default indicator has no message; the system does not invent one from the command title. A disabled policy ignores its message. Negative delays are invalid. There is no parent-command policy inheritance chain.
+
+This is a contract extract: the positional properties are explicitly get-only and initialized from the corresponding validated constructor parameters. Positional notation preserves the named arguments `AfterMs` and `Message` and deconstruction; it does not expose writable `init` properties. A `with` expression cannot replace these fields to bypass delay validation. `default(CommandActivity)` has absent delay and message and is disabled, whereas a null node property inherits configuration. Equality is by the stored policy fields.
 
 ## Example
 

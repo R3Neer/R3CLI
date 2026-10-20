@@ -16,13 +16,12 @@ Constructing the description does not print. `Show` is the explicit output bound
 
 ## API contract
 
-These are API extracts, not implementation bodies or a compiling source file.
+These are API extracts, not implementation bodies or a compiling source file. The primary constructor preserves the IMessageBody overload and its camelCase body parameter; the string overload delegates through Text. SymbolTextBase validates and retains Body as a get-only property.
 
 ```csharp
-public sealed class Warning : SymbolTextBase
+public sealed class Warning(IMessageBody body) : SymbolTextBase(body)
 {
     public Warning(string body);
-    public Warning(IMessageBody body);
     // Body is inherited from SymbolTextBase.
 }
 ```
