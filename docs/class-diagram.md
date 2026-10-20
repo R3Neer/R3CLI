@@ -66,6 +66,7 @@ classDiagram
     IComponent <|.. Table
     Table o-- Row
     Table o-- Column
+    Table ..> Separator : header rule
     Column ..> Row : selects value
     Column ..> IInlineContent : presentation
     IComponent <|.. Tree

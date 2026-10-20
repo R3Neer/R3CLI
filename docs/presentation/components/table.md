@@ -64,13 +64,14 @@ public sealed class Table : IComponent
 
 ## Composition
 
-Rows are data and columns are selectors, not separate lists of cells. Header is mandatory. A column selects exactly one field or index, established by its constructor. The string-column constructor maps each mandatory header to its zero-based positional column, using the same access and validation as an explicit Column(header, index). Rows are the first parameter in both overloads. Internal lookup, validation and cell-layout helper methods are implementation choices, not fixed API contracts; sealed types require no protected API.
+Rows are data and columns are selectors, not separate lists of cells. Table composes the mandatory header row, a default [[docs/presentation/components/separator|Separator]] and the data rows; callers do not supply this separator. Header is mandatory. A column selects exactly one field or index, established by its constructor. The string-column constructor maps each mandatory header to its zero-based positional column, using the same access and validation as an explicit Column(header, index). Rows are the first parameter in both overloads. Internal lookup, validation and cell-layout helper methods are implementation choices, not fixed API contracts; sealed types require no protected API.
 
 ```mermaid
 classDiagram
     IComponent <|.. Table
     Table o-- "0..*" Row : rows
     Table o-- "0..*" Column : columns
+    Table ..> Separator : header rule
     Column ..> Row : reads
     Column ..> IInlineContent : presents
 ```
@@ -88,10 +89,13 @@ The preview shows the semantic arrangement. Browser rendering is illustrative; i
 | Part | Token |
 |---|---|
 | Default headers | `subtext.foreground` |
+| Header separator | `subtext.foreground` |
 | Default values | `text.foreground` |
 | Custom cells | `Tokens of their inline components` |
 
 ### Layout
+
+By default, render exactly one ordinary Separator immediately below the complete header row, using the continuous Unicode pattern ─ (U+2500), or - in ASCII mode. It spans the full laid-out table width, including the gaps between columns, rather than adding a separate rule per column. There is no blank line between headers, rule and data. Wrapped headers finish before the rule. Both constructors share this presentation; no new constructor argument or colour token is needed. An empty table with visible columns still shows its headers and rule; an empty visible projection shows neither. In the labelled vertical-record fallback there is no shared header row, so no header rule is emitted.
 
 Cells can wrap or contain permitted explicit breaks; row height is the tallest cell. Column minimum is min(natural width, 8 cells). If minimums plus gaps do not fit, render labelled vertical records, preserving labels and order. Request one lower gap after the complete table.
 
@@ -117,7 +121,7 @@ Output.Show(detailed, compact);
 
 ## Structured data
 
-Rows retain supported original values and field names independently of headers and presentation. The numeric value 2048L stays numeric when its cell reads 2 KiB. Displayed columns do not implicitly project away unselected fields. Adapters accept native rows/records and build these descriptions internally. See [[docs/integration/adapter-boundaries|Adapter boundaries]].
+The header rule is human presentation only; it adds no row, field or value to Nushell or PowerShell structured output. Rows retain supported original values and field names independently of headers and presentation. The numeric value 2048L stays numeric when its cell reads 2 KiB. Displayed columns do not implicitly project away unselected fields. Adapters accept native rows/records and build these descriptions internally. See [[docs/integration/adapter-boundaries|Adapter boundaries]].
 
 ## Customization
 

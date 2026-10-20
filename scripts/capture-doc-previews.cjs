@@ -39,6 +39,19 @@ async function main() {
         await page.locator('main').screenshot({ path: path.join(captureDirectory, `${slug}.png`) });
         const wide = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }));
         if (wide.width > wide.viewport) errors.push('Horizontal clipping at normal width');
+        if (slug === 'table' || slug === 'structure') {
+          const tables = await page.locator('[data-table]').count();
+          if (tables !== (slug === 'table' ? 2 : 1)) errors.push('Missing table fixture');
+          const rules = await page.evaluate(() => [...document.querySelectorAll('[data-table]')].map(table => {
+            const rule = table.querySelector('[data-table-header-rule]');
+            const lines = [...table.children];
+            const glyphs = rule?.textContent || '';
+            const expected = parseInt(table.style.width, 10);
+            return !!rule && lines[1] === rule && /^─+$/.test(glyphs) && glyphs.length === expected
+              && getComputedStyle(rule.firstElementChild).color === getComputedStyle(lines[0].firstElementChild).color;
+          }));
+          if (rules.some(valid => !valid)) errors.push('Table header rule must follow headers, span the table and use subtext');
+        }
         if (slug === 'separator') {
           const actual = await page.evaluate(() => {
             const rule = document.querySelector('.rule');
