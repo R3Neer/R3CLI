@@ -1,0 +1,14 @@
+"use strict";
+const screen=document.querySelector('.screen'),initial=screen.innerHTML;
+const frames=['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+let timer=null,frame=0,completed=12;
+function stop(){if(timer!==null)clearInterval(timer);timer=null;document.querySelector('#play')?.setAttribute('aria-pressed','false');}
+function tick(){frame=(frame+1)%frames.length;document.querySelectorAll('.frame').forEach(e=>e.textContent=frames[frame]);}
+document.querySelector('#play')?.addEventListener('click',()=>{if(timer!==null){stop();return;}timer=setInterval(tick,100);document.querySelector('#play').setAttribute('aria-pressed','true');});
+document.querySelector('#reset')?.addEventListener('click',()=>{stop();screen.innerHTML=initial;frame=0;completed=12;fitRules();});
+document.querySelector('#update')?.addEventListener('click',()=>{completed=25;document.querySelectorAll('.counts').forEach(e=>e.textContent='25/40 files · 63%');document.querySelectorAll('.bar').forEach(e=>{const n=13;e.replaceChildren();for(const [cls,text]of [['text','━'.repeat(n)],['muted','━'.repeat(20-n)]]){const span=document.createElement('span');span.className=cls;span.textContent=text;e.append(span);}});const activity=document.querySelector('#activity-region');if(activity)activity.innerHTML='<div class="line"><span class="success">✓</span> Resolving dependencies</div>';const stage=document.querySelector('#stage-first');if(stage)stage.innerHTML='<div class="line"><span class="success">✓</span> Resolve dependencies</div>';const view=document.querySelector('#view-region');if(view)view.innerHTML=document.body.dataset.slug==='structure'?'<div class="block task" data-progress="true"><div class="line"><span class="accent frame">⠋</span> Reading metadata <span class="muted counts">12/40 files · 30%</span></div><div class="line">  <span class="bar"><span class="text">━━━━━━</span><span class="muted">━━━━━━━━━━━━━━</span></span></div></div>':'<div class="line"><span class="muted">Files: </span>25</div>';});
+document.querySelector('#remove')?.addEventListener('click',()=>{stop();document.querySelector('#view-region')?.replaceChildren();});
+document.querySelector('#content')?.addEventListener('input',e=>{const first=screen.querySelector('.line');const target=first?.querySelector('span')||first;if(target)target.textContent=e.target.value;});
+function fitRules(){document.querySelectorAll('.rule').forEach(e=>{const span=e.firstElementChild,pattern=e.dataset.pattern;const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');const style=getComputedStyle(span);ctx.font=style.font;const width=ctx.measureText(pattern).width;const count=Math.max(0,Math.floor(e.clientWidth/width));span.textContent=pattern.repeat(count).trimEnd();});}
+new ResizeObserver(fitRules).observe(screen);
+document.fonts.ready.then(()=>{fitRules();window.previewStatus={ready:true,animationPaused:true};});

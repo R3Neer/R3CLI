@@ -1,5 +1,8 @@
 # R3CLI
 
+> [!NOTE]
+> The implementation and quick starts below describe the existing Python and shell packages. The current C# API specification lives in [`docs/`](docs/README.md); reorganizing that reference does not implement or publish the new backend.
+
 [![CI](https://github.com/R3Neer/R3CLI/actions/workflows/ci.yml/badge.svg)](https://github.com/R3Neer/R3CLI/actions/workflows/ci.yml)
 
 R3CLI is the shared command-line presentation layer for R3Neer's tools.
@@ -56,7 +59,7 @@ error                   red + symbol
 
 Colour is never the only signal. Status meaning is paired with symbols, and every renderer can fall back to ASCII.
 
-See [`docs/design-language.md`](docs/design-language.md) for the full visual contract.
+The current C# specification is in [`docs/presentation/README.md`](docs/presentation/README.md); it describes the new contracts rather than the released API shown below.
 
 ## Python quick start
 
@@ -138,7 +141,7 @@ The same catalogue can therefore drive overview help, focused help and contract 
 
 See:
 
-- [`docs/help-system.md`](docs/help-system.md);
+- [`docs/presentation/components/help.md`](docs/presentation/components/help.md) for the current C# help specification;
 - [`templates/help-catalogue.toml`](templates/help-catalogue.toml).
 
 ## Nushell adapter
@@ -159,7 +162,7 @@ Automatic colour detection is evaluated at the final emission boundary so collec
 
 The console can also receive an explicit sink, terminal state, width, ASCII mode and theme extension, making product integration and deterministic tests possible without rewriting rendering code.
 
-See [`docs/nushell.md`](docs/nushell.md).
+For the new native-data integration contract, see [`docs/integration/adapter-boundaries.md`](docs/integration/adapter-boundaries.md).
 
 ## PowerShell adapter
 
@@ -167,7 +170,7 @@ The PowerShell adapter exposes the same visual language as a module and likewise
 
 Products can vendor the generated distribution and import it privately instead of requiring users to install R3CLI as a separate global module.
 
-See [`docs/powershell.md`](docs/powershell.md).
+For the new adapter contract, see [`docs/integration/adapter-boundaries.md`](docs/integration/adapter-boundaries.md).
 
 ## Building shell distributions
 
@@ -251,14 +254,16 @@ After changing renderers, resources, help contracts or shell adapters, also buil
 
 The project currently supports Python 3.11 through 3.14 and targets PowerShell 7 and Nushell 0.115+ for the official shell adapters.
 
-For package build, wheel verification, and PyPI release steps, see [`docs/python-release.md`](docs/python-release.md).
+The existing Python publication workflow remains in [`.github/workflows/release.yml`](.github/workflows/release.yml). The new backend deployment choice is tracked in [`docs/questions/native-aot-or-jit.md`](docs/questions/native-aot-or-jit.md).
 
 ## Documentation
 
-- [`docs/design-language.md`](docs/design-language.md) — visual semantics and accessibility contract;
-- [`docs/help-system.md`](docs/help-system.md) — catalogue-driven help;
-- [`docs/powershell.md`](docs/powershell.md) — PowerShell API and packaging;
-- [`docs/nushell.md`](docs/nushell.md) — Nushell API, packaging and behaviour.
+- [`docs/README.md`](docs/README.md) — current C# specification and navigation;
+- [`docs/structure.md`](docs/structure.md) — combined composition, preview and C# source;
+- [`docs/presentation/README.md`](docs/presentation/README.md) — Presentation Components and output contracts;
+- [`docs/configuration/README.md`](docs/configuration/README.md) — TOML and the eight colour tokens;
+- [`docs/command-system/README.md`](docs/command-system/README.md) — command definitions, help, diagnostics and activity;
+- [`docs/integration/README.md`](docs/integration/README.md) — native adapter boundaries.
 
 ## Licence
 

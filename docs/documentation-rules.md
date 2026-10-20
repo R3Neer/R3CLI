@@ -6,6 +6,14 @@ type: concept
 
 The documentation describes the current R3CLI specification. A contract is not a claim that the released implementation already provides it. Implementation availability is explained in [[docs/README]], without repeating release archaeology in individual reference pages.
 
+## Responsibilities
+
+Templates define document contracts; reference pages instantiate them; questions hold unresolved decisions; previews demonstrate the same cases as their C# examples.
+
+## Rules
+
+The following conventions apply to every current document and asset.
+
 ## Language and Markdown
 
 Write documentation, identifiers, comments and default examples in English. Use Obsidian Markdown: YAML properties, repository-root-qualified wikilinks, image embeds, callouts, Mermaid and fenced blocks with a language. Understanding a contract must not require an Obsidian plugin. Use ordinary relative Markdown links for executable HTML previews.
@@ -51,3 +59,21 @@ An unresolved decision has one document under `docs/questions/`, using the quest
 ## Publication checks
 
 Check metadata, required sections, unique H1 titles, local links and image targets, balanced code fences, related-type diagrams, exactly eight standard tokens, current HTML/capture pairs and absence of template placeholders. Verify HTML with a real browser, including interaction and overflow. Review API/examples against the accepted contract. Documentation checks do not imply library compilation, native-shell tests or runtime implementation.
+
+Run the standard-library checker from the repository root:
+
+```console
+python scripts/validate-docs.py
+```
+
+Recheck and recapture browser fixtures using an existing Playwright installation and Chromium executable:
+
+```console
+node scripts/capture-doc-previews.cjs --playwright-module <existing-playwright-module> --browser-executable <existing-chromium-executable>
+```
+
+The browser checker tests normal and narrow widths and explicit interaction before reporting failures. It writes captures and does not install dependencies or run R3CLI. An optional `--report <file>` writes machine-readable results outside the reference pages.
+
+## Example
+
+`docs/presentation/components/table.md` uses `type: presentation-component`, owns Row/Column/Table in one diagram, embeds `docs/assets/captures/table.png`, links the matching offline HTML, and includes the C# source of that same example. An unresolved transport choice belongs in its own question, not a speculative addition to the Table API.
