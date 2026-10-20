@@ -44,6 +44,8 @@ A document owns one public concept, including its supporting types: Table owns R
 
 API extracts may omit method bodies; identify them as contract extracts rather than a compiling project. Use modern stable C# where useful. Do not introduce methods, inheritance, defaults or transport guarantees that have not been decided. C# examples must follow the declared composition memberships; in particular BlankLine is block-only and cannot be supplied to Line.
 
+Use primary constructors to reduce syntax without silently changing named arguments, public properties, identity or validation. A class primary parameter is not automatically a property. Use records for specified value equality, not as a universal shorthand for every class. Get-only record properties retain validated values; positional notation must not expose an `init`/`with` route around invariants. Arrays, lists and delegates do not acquire deep semantic equality merely by belonging to a record. Preserve positional deconstruction where it is already part of the contract.
+
 ## Visual evidence
 
 Each presentation-component document has exactly one representative capture, one current offline HTML preview and the C# composition represented by that preview. Use matching stems under `docs/assets/captures/` and `docs/assets/previews/`. A preview may offer several cases, content edits or live controls; its capture is deterministic. Abstract/value concepts are demonstrated through their owners or consumers rather than being given invented visual chrome.
@@ -72,7 +74,7 @@ Recheck and recapture browser fixtures using an existing Playwright installation
 node scripts/capture-doc-previews.cjs --playwright-module <existing-playwright-module> --browser-executable <existing-chromium-executable>
 ```
 
-The browser checker tests normal and narrow widths and explicit interaction before reporting failures. It writes captures and does not install dependencies or run R3CLI. An optional `--report <file>` writes machine-readable results outside the reference pages.
+The browser checker tests normal and narrow widths and explicit interaction before reporting failures. TabLeader probes cover spaces, symbols, partial pattern cycles, a segmented prefix, exhausted targets, zero width and reset. It writes captures and does not install dependencies or run R3CLI. An optional `--report <file>` writes machine-readable results outside the reference pages.
 
 ## Example
 

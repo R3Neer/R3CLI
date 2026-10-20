@@ -172,6 +172,59 @@ def check(root: Path) -> dict:
                     fail(config, "named themes are outside the current schema")
             except tomllib.TOMLDecodeError as error:
                 fail(config, f"invalid TOML example: {error}")
+    # Cross-document API invariants: these check the specification, not a backend.
+    invariant_files = {
+        "presentation/components/tab-leader.md": (
+            r"public\s+readonly\s+record\s+struct\s+TabLeader\s*:\s*IInlineContent",
+            r"public\s+int\s+Width\s*\{\s*get;\s*\}",
+            r"public\s+Symbol\?\s+Symbol\s*\{\s*get;\s*\}",
+        ),
+        "presentation/components/field.md": (
+            r"public\s+Field\(string\s+label,\s*string\s+value,\s*TabLeader\?\s+separator\s*=\s*null\)",
+        ),
+        "presentation/components/table.md": (
+            r"public\s+Table\(IEnumerable<Row>\s+rows,\s*params\s+Column\[\]\s+columns\)",
+            r"public\s+Table\(IEnumerable<Row>\s+rows,\s*IEnumerable<string>\s+columns\)",
+        ),
+        "presentation/components/symbol.md": (
+            r"public\s+readonly\s+record\s+struct\s+Symbol\b",
+            r"public\s+string\s+Value\s*\{\s*get;\s*\}",
+        ),
+        "presentation/progress-model.md": (
+            r"public\s+readonly\s+record\s+struct\s+TaskProgress\b",
+            r"public\s+long\s+Completed\s*\{\s*get;\s*\}",
+            r"public\s+long\?\s+Total\s*\{\s*get;\s*\}",
+        ),
+        "presentation/components/spinner.md": (
+            r"public\s+sealed\s+record\s+SelectedFrame\(int\s+Index\)\s*:\s*FrameSource",
+            r"public\s+int\s+Index\s*\{\s*get;\s*\}",
+            r"public\s+int\s+IntervalMs\s*\{\s*get;\s*\}",
+        ),
+        "command-system/automatic-activity.md": (
+            r"public\s+readonly\s+record\s+struct\s+CommandActivity\(\s*int\?\s+AfterMs,\s*string\?\s+Message\s*=\s*null\)",
+            r"public\s+int\?\s+AfterMs\s*\{\s*get;\s*\}",
+            r"public\s+string\?\s+Message\s*\{\s*get;\s*\}",
+        ),
+        "presentation/components/blank-line.md": (
+            r"public\s+sealed\s+class\s+BlankLine\s*:\s*IComponent",
+        ),
+    }
+    for relative, patterns in invariant_files.items():
+        path = docs / relative
+        if not path.exists():
+            fail(path, "missing invariant-owning reference")
+            continue
+        source = path.read_text(encoding="utf-8-sig")
+        api = "\n".join(re.findall(r"```csharp\n(.*?)\n```", source, re.S))
+        for pattern in patterns:
+            if not re.search(pattern, api):
+                fail(path, f"API invariant not represented: {pattern}")
+    for relative in ("presentation/components/view.md", "presentation/components/tree.md", "presentation/components/stages-display.md", "presentation/output.md"):
+        path = docs / relative
+        if path.exists():
+            source = path.read_text(encoding="utf-8-sig")
+            if re.search(r"\brecord\s+(?:struct\s+)?(?:View|ViewHandle|Tree|TreeNode|StagesDisplay|StableOutput)\b", source):
+                fail(path, "identity-bearing type represented as a record")
     return {"markdown": len(markdown), "components": len(components), "html_previews": len(previews), "captures": len(captures), "mermaid_diagrams": diagrams, "errors": errors}
 
 

@@ -39,6 +39,47 @@ async function main() {
         await page.locator('main').screenshot({ path: path.join(captureDirectory, `${slug}.png`) });
         const wide = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }));
         if (wide.width > wide.viewport) errors.push('Horizontal clipping at normal width');
+        if (slug === 'separator') {
+          const actual = await page.evaluate(() => {
+            const rule = document.querySelector('.rule');
+            const text = rule.firstElementChild;
+            const context = document.createElement('canvas').getContext('2d');
+            context.font = getComputedStyle(text).font;
+            rule.dataset.pattern = '=-';
+            rule.style.width = `${context.measureText('M').width * 15}px`;
+            fitRules();
+            return text.textContent;
+          });
+          if (actual !== '=-=-=-=-=-=-=-=') errors.push(`Separator discarded a partial final cycle: ${JSON.stringify(actual)}`);
+        }
+        if (slug === 'tab-leader') {
+          const probe = async (label, width, pattern, expected) => {
+            await page.locator('#leader-label').fill(label);
+            await page.locator('#leader-width').fill(String(width));
+            await page.locator('#leader-pattern').fill(pattern);
+            const actual = await page.locator('[data-leader] .leader-fill').first().textContent();
+            if (actual !== expected) errors.push(`TabLeader(${JSON.stringify(label)}, ${width}, ${JSON.stringify(pattern)}): expected ${JSON.stringify(expected)}, received ${JSON.stringify(actual)}`);
+          };
+          await probe('Project', 14, '', '       ');
+          await probe('Project', 14, '.', '.......');
+          await probe('Files', 14, '.', '.........');
+          await probe('Note', 13, '_-\\_', '_-\\__-\\__');
+          await probe('Name', 5, '界-', ' ');
+          await probe('Project (local)', 14, '.', ' ');
+          await probe('Name', 0, '.', ' ');
+          await page.evaluate(() => {
+            const owner = document.querySelector('[data-leader]');
+            owner.querySelector('.leader-prefix').innerHTML = '<span>Pro</span><span>ject</span>';
+            owner.dataset.width = '14';
+            owner.dataset.pattern = '.';
+            fitLeaders();
+          });
+          const multiple = await page.locator('[data-leader] .leader-fill').first().textContent();
+          if (multiple !== '.......') errors.push('TabLeader did not measure the whole segmented prefix');
+          await page.locator('#reset').click();
+          const reset = await page.locator('[data-leader] .leader-fill').first().textContent();
+          if (reset !== '.......') errors.push('TabLeader reset did not restore the fixture');
+        }
         if (await page.locator('#update').count()) {
           const before = await page.locator('.screen').textContent();
           await page.locator('#update').click();
