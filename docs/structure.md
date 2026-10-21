@@ -36,7 +36,7 @@ The combined fixture uses the Catppuccin Mocha preset on its simulated reference
 
 The `command` parameter below is an application-owned CliNode whose generated help describes `modpack project use`: usage `modpack project use <name>`, options `--no-human` and `-h, --help`, and an example `modpack project use demo`. It supplies the usage/options/examples sections selected by this fixture. The CLI parser/typed definition mechanism is not invented by this example.
 
-The input helper Category is an example application record, not an R3CLI type. Categories are retained as original node data by Tree.From.
+The input helper Category is an example application record, not an R3CLI type. Categories are retained as original typed source values by Tree.From; the data selector declares their named structured fields.
 
 ## Preview
 
@@ -61,6 +61,11 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
     var leader = new TabLeader(12, new Symbol("."));
 
     var tree = Tree.From(categories,
+        data: category => new Dictionary<string, object?>
+        {
+            ["name"] = category.Name,
+            ["count"] = category.Count
+        },
         children: category => category.Children,
         presentation: category => new Line(
             category.Name,

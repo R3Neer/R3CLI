@@ -316,12 +316,26 @@ def check(root: Path) -> dict:
         fail(docs / "presentation/components/table.md", "Table construction must put columns first")
     if (docs / "questions/dotnet-version.md").exists():
         fail(docs / "questions/dotnet-version.md", "the C# 15 preview baseline is resolved")
-    for relative in ("presentation/components/view.md", "presentation/components/tree.md", "presentation/components/stages-display.md", "presentation/output.md"):
+    for relative in ("presentation/components/view.md", "presentation/components/tree.md", "presentation/components/stages-display.md", "presentation/output/sessions-and-handles.md"):
         path = docs / relative
         if path.exists():
             source = path.read_text(encoding="utf-8-sig")
             if re.search(r"\brecord\s+(?:struct\s+)?(?:View|ViewHandle|Tree|TreeNode|StagesDisplay|OutputScope)\b", source):
                 fail(path, "identity-bearing type represented as a record")
+    tree_path = docs / "presentation/components/tree.md"
+    tree_source = tree_path.read_text(encoding="utf-8")
+    if "public abstract IReadOnlyDictionary<string, object?> Data" not in tree_source or "Func<TData, IReadOnlyDictionary<string, object?>> data" not in tree_source:
+        fail(tree_path, "Tree requires named Data fields and an explicit From data selector")
+    if "sealed override object? Data" in tree_source:
+        fail(tree_path, "Tree Data must be separate from typed source Value")
+    model_path = docs / "presentation/architecture/model-and-construction.md"
+    if not model_path.exists():
+        errors.append("missing accepted construction-model reference")
+    else:
+        model = model_path.read_text(encoding="utf-8")
+        for contract in ("internal static class ContentCapture", "internal readonly record struct CapturedTable", "internal readonly record struct CapturedTreeNode", "ImmutableArray<TreeNode> Children"):
+            if contract not in model:
+                fail(model_path, f"missing construction contract: {contract}")
     return {"markdown": len(markdown), "components": len(components), "html_previews": len(previews), "captures": len(captures), "mermaid_diagrams": diagrams, "errors": errors}
 
 

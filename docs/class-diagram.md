@@ -14,7 +14,7 @@ Presentation Components describe content; scoped output sessions own mounted reg
 
 Inheritance indicates API membership. Composition/association lines identify stored or referenced descriptions, not a new inheritance relationship. Symbol is a value, Row/Column are data/view descriptors, and ViewHandle is identity: none becomes inline merely because it contributes to a rendered line.
 
-TreeNodeT below denotes `TreeNode<TData>`; it is abstract and provides typed Value over the same original Data. The diagram omits speculative parser/value/handler classes and adapter transport types.
+TreeNodeT below denotes `TreeNode<TData>`; it is abstract and provides typed Value for the original source, separately from the string-keyed Data mapping. The diagram omits speculative parser/value/handler classes and adapter transport types.
 
 ## Class diagram
 
@@ -89,6 +89,7 @@ classDiagram
     Tree --> "1" TreeNode : Root
     TreeNode o-- TreeNode : Children
     TreeNode --> Line : Presentation
+    TreeNode --> IReadOnlyDictionary : structured Data
     IComponent <|.. Diagnostic
     Diagnostic --> DiagnosticLevel
     Diagnostic o-- IInlineContent : Recovery

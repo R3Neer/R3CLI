@@ -19,7 +19,7 @@ Constructors describe content; they do not print. Data, presentation, output ide
 
 ## Rules
 
-Input unions normalize strings to Text only, never to Subtext. Native value-to-text conversion preserves original logical type information and captures display text once. Tables require at least one data row, take columns before rows, and classify Auto alignment from original values rather than formatted strings. Source selectors preserve complete source objects separately from selected cells. Native records and arrays must be usable as table rows without manually creating CLR `Row` instances. Trees may retain arrays, dictionaries, scalars or consumer objects and derive children explicitly. A stored value does not automatically become a child relationship.
+Input unions normalize strings to Text only, never to Subtext. Native value-to-text conversion preserves original logical type information and captures display text once. Tables require at least one data row, take columns before rows, and classify Auto alignment from original values rather than formatted strings. Source selectors preserve complete source objects separately from selected cells. Native records and arrays must be usable as table rows without manually creating CLR `Row` instances. TreeNode.Data is a declared string-keyed field mapping. The optional generic node base retains the typed original source as Value, separately from fields and Presentation. Field values may themselves be arrays, dictionaries, scalars or consumer objects; those values do not automatically become children. Adapters consume captured fields and hierarchy, preserving original supported logical values. Tree.From adapts existing objects using explicit data, children and presentation selectors.
 
 ## Example
 

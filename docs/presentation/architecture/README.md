@@ -8,6 +8,7 @@ The presentation backend fulfills the accepted component and output contracts in
 
 ## Contents
 
+- [[docs/presentation/architecture/model-and-construction|Model and construction]] defines the accepted phase 1 capture model and internal contracts.
 - [[docs/presentation/architecture/spectre-console|Spectre.Console integration]] defines the accepted rendering/detection dependency and delegation limits.
 - [[docs/presentation/output/README|Output]] defines the public boundary, session lifetime, capabilities and handles.
 - [[docs/presentation/composition|Composition]] defines the current description model and original-value retention.
@@ -19,7 +20,7 @@ Design in the following order. These are responsibility boundaries to examine, n
 
 | Step | Design responsibility | Evidence to use |
 |---|---|---|
-| 1 | Component construction, data capture and validation | Selectors/conversions run at their contracted boundary, not on every repaint |
+| 1 | [[docs/presentation/architecture/model-and-construction|Component construction, data capture and validation]] | Closed design: node-owned captures, CapturedTable and shared normalization; no runtime implementation |
 | 2 | Presentation context | Borrowed writer, configuration, capabilities, theme and dimensions |
 | 3 | Measurement and composition | Terminal cells, wrapping, alignment, margins and children |
 | 4 | Static rendering | Components to styled output; exact Spectre reuse |
