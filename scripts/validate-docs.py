@@ -133,6 +133,21 @@ def check(root: Path) -> dict:
             if len(set(declarations)) > 1 and "```mermaid" not in body:
                 fail(path, "multiple related types without a class diagram")
 
+    # Output docs must consistently describe the accepted borrowed-writer API.
+    for path in markdown:
+        if path.parent == docs / "templates":
+            continue
+        if re.search(r"\b(?:IOutput|StableOutput)\b|docs/questions/default-output-scope", path.read_text(encoding="utf-8-sig")):
+            fail(path, "obsolete output abstraction or resolved scope question")
+    output_contract = docs / "presentation/output/sessions-and-handles.md"
+    if output_contract.exists():
+        contract = output_contract.read_text(encoding="utf-8")
+        for member in ("OutputScope Use(TextWriter writer)", "class OutputScope : IDisposable", "void Close(ViewHandle view)", "void Remove(ViewHandle view)"):
+            if member not in contract:
+                fail(output_contract, f"missing output contract: {member}")
+    else:
+        errors.append("missing canonical output session contract")
+
     expected = set(components) | {"structure"}
     previews = {p.stem for p in (docs / "assets/previews").glob("*.html")}
     captures = {p.stem for p in (docs / "assets/captures").glob("*.png")}
@@ -305,7 +320,7 @@ def check(root: Path) -> dict:
         path = docs / relative
         if path.exists():
             source = path.read_text(encoding="utf-8-sig")
-            if re.search(r"\brecord\s+(?:struct\s+)?(?:View|ViewHandle|Tree|TreeNode|StagesDisplay|StableOutput)\b", source):
+            if re.search(r"\brecord\s+(?:struct\s+)?(?:View|ViewHandle|Tree|TreeNode|StagesDisplay|OutputScope)\b", source):
                 fail(path, "identity-bearing type represented as a record")
     return {"markdown": len(markdown), "components": len(components), "html_previews": len(previews), "captures": len(captures), "mermaid_diagrams": diagrams, "errors": errors}
 

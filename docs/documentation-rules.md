@@ -40,6 +40,8 @@ The H1 is the title; do not duplicate it in metadata. Do not add status, date, a
 
 Define the relevant template before instantiating a document. Required sections are always present; conditional sections are present only when their condition applies; optional sections need useful content. Remove template instructions and placeholders from instances. Never leave empty sections.
 
+Presentation authoring contracts live in `docs/presentation/components/`. Public output contracts live in `docs/presentation/output/`; internal responsibility and dependency design lives in `docs/presentation/architecture/`. Use the existing concept and index templates for both folders, without adding metadata types. Keep internal design prose separate from public API declarations and link to the canonical owner instead of duplicating contracts.
+
 A document owns one public concept, including its supporting types: Table owns Row/Column; Tree owns its node bases. Link to other concepts instead of maintaining duplicate contract definitions. Include a class diagram whenever the document covers several related types. The general diagram is [[docs/class-diagram]].
 
 API extracts may omit method bodies; identify them as contract extracts rather than a compiling project. Use C# 15 preview as specified in [[docs/integration/build-baseline|Build baseline]] where useful. Do not introduce methods, inheritance, defaults or transport guarantees that have not been decided. C# examples must follow the declared composition memberships; in particular BlankLine is block-only and cannot be supplied to Line.

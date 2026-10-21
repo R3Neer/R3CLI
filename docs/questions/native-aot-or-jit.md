@@ -25,4 +25,4 @@ Compare representative startup, rendering, adapter communication and distributio
 ## Affected documents
 
 - [[docs/integration/adapter-boundaries]]
-- [[docs/presentation/output]]
+- [[docs/presentation/output/README]]

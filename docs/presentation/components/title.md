@@ -12,7 +12,7 @@ A block heading with its own colour and emphasis. It is not inline content and d
 new Title("Project report").Show();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 

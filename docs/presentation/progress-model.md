@@ -71,4 +71,4 @@ handle.Update(new ProgressDisplay("Downloading files",
 handle.Close();
 ```
 
-Automatic feedback belongs to [[docs/command-system/automatic-activity|Command activity]], not to these data constructors. Stable output is an [[docs/presentation/output|output strategy]], not a fourth task state.
+Automatic feedback belongs to [[docs/command-system/automatic-activity|Command activity]], not to these data constructors. Stable output is an [[docs/presentation/output/README|output strategy]], not a fourth task state.

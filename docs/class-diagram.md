@@ -8,7 +8,7 @@ This map summarizes the current public concepts and their ownership. Detailed me
 
 ## Responsibilities
 
-Presentation Components describe content; IOutput owns mounted regions. Row/Column support Table, node bases support Tree, and Help composes Sections. Command definitions feed presentation without becoming its renderer.
+Presentation Components describe content; scoped output sessions own mounted regions through the Output facade and borrow .NET TextWriter destinations. Row/Column support Table, node bases support Tree, and Help composes Sections. Command definitions feed presentation without becoming its renderer.
 
 ## Rules
 
@@ -107,11 +107,11 @@ classDiagram
     IComponent <|.. View
     View o-- IComponent
     View --> ViewHandle
-    class IOutput { <<interface>> }
-    IOutput ..> IComponent : Show
-    IOutput ..> ViewHandle : Update Close Remove
-    IOutput <|.. StableOutput
-    Output ..> IOutput : facade
+    Output ..> IComponent : Show
+    Output ..> OutputScope : Use
+    OutputScope ..|> IDisposable
+    OutputScope --> TextWriter : borrows
+    OutputScope ..> ViewHandle : session lifetime
     Output ..> ViewHandle : original owner
     IInlineContent <|.. Spinner
     Spinner --> Symbol : frames

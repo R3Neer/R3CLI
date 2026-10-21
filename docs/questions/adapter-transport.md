@@ -27,4 +27,4 @@ Specify supported values, precision/null/missing behavior, errors, request/event
 - [[docs/integration/adapter-boundaries]]
 - [[docs/presentation/components/table]]
 - [[docs/presentation/components/tree]]
-- [[docs/presentation/output]]
+- [[docs/presentation/output/README]]

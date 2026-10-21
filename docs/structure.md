@@ -17,7 +17,7 @@ R3CLI separates original data, presentation descriptions, output sessions and th
 | Command System | Define commands, derive help, coordinate execution/activity and map failures to diagnostics |
 | Adapters | Offer idiomatic authoring and preserve native structured values |
 
-The complete type map is [[docs/class-diagram]]. Component contracts are under [[docs/presentation/README]].
+The complete type map is [[docs/class-diagram]]. Component contracts are under [[docs/presentation/README]]. [[docs/presentation/output/README|Output]] borrows .NET TextWriter destinations through scoped contexts. [[docs/presentation/architecture/spectre-console|Spectre.Console]] supplies rendering and detection internally; R3CLI retains session and handle ownership.
 
 ## Rules
 
@@ -119,7 +119,9 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
     return report;
 }
 
-// The host calls ShowPresentation(command, out var metadata).
+// The host establishes an enclosing Output.Use(Console.Error) scope,
+// calls ShowPresentation(command, out var metadata), and keeps the scope
+// alive while using the returned handles.
 // The preview's update action corresponds to:
 static void UpdateMetadata(ViewHandle metadata) =>
     metadata.Update(new ProgressDisplay("Reading metadata",

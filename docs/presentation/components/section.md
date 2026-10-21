@@ -9,15 +9,16 @@ A titled block that organizes children, computes its visual depth from nesting a
 ## Usage
 
 ```csharp
-new Section("Project", 3,
-    new Field("Name", "demo"),
-    new Section("Content",
-        new Field("Files", 12),
-        new Section("Validation", new Success("Checks passed."))))
-    .Show();
+Output.Show(
+    new Section("Project", 3,
+        new Field("Name", "demo"),
+        new Section("Content",
+            new Field("Files", 12),
+            new Section("Validation", new Success("Checks passed.")))),
+    "Report complete.");
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 
@@ -64,7 +65,9 @@ The preview shows the semantic arrangement. Browser rendering is illustrative; i
 
 ### Layout
 
-Render an optional count as 3. Project. No gap between heading and rule. Root with nested sections uses ═; level two and flat roots use ─; level three and deeper use -. Indent bodies normally by two cells. Request one collapsed lower gap after the complete section.
+Render an optional count as 3. Project. No gap between heading and rule. Root with nested sections uses ═; level two and flat roots use ─; level three and deeper use -. Indent bodies normally by two cells.
+
+Place one empty line before each subsection heading, including a subsection that is the first child directly after its parent heading and rule. After a complete section or subsection, request one empty line before the next block. Adjacent and nested automatic gaps collapse to one empty line; a subsection lower gap and the next subsection upper gap never add together. A parent and its final subsection likewise share the same lower gap. Do not insert an extra trailing child gap when no following content exists; complete-response spacing handles the outer boundary.
 
 Shared wrapping, Unicode and control handling are defined in [[docs/presentation/text-and-layout|Text and layout]]. Automatic margins collapse by maximum; explicit [[docs/presentation/components/blank-line|BlankLine]] remains additional content.
 
@@ -77,10 +80,11 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
-new Section("Project", 3,
-    new Field("Name", "demo"),
-    new Section("Content",
-        new Field("Files", 12),
-        new Section("Validation", new Success("Checks passed."))))
-    .Show();
+Output.Show(
+    new Section("Project", 3,
+        new Field("Name", "demo"),
+        new Section("Content",
+            new Field("Files", 12),
+            new Section("Validation", new Success("Checks passed.")))),
+    "Report complete.");
 ```

@@ -52,7 +52,7 @@ Human output and native values are separate results of presentation. Never recov
 - An arbitrary CLR object retained by `TreeNode.Data` is not automatically portable.
 - Structured output receives no ANSI, animation frames or decorative blank lines.
 
-The exact supported-value profile and transport are addressed in [[docs/questions/adapter-transport|Adapter transport]]. The default output context is addressed in [[docs/questions/default-output-scope|Default output scope]].
+The exact supported-value profile and transport are addressed in [[docs/questions/adapter-transport|Adapter transport]]. The adapter establishes the borrowed TextWriter context defined in [[docs/presentation/output/sessions-and-handles|Sessions and handles]]. Spectre types remain internal to the backend; native structured values bypass human rendering.
 
 ## Language policy
 

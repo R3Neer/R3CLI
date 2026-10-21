@@ -12,7 +12,7 @@ Success is a block message with a fixed indicator and an ordinary textual body.
 new Success("Configuration saved.").Show();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 

@@ -16,7 +16,7 @@ handle.Update(new ProgressDisplay(
 handle.Close();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 
@@ -89,4 +89,4 @@ TaskProgress retains numeric Completed and Total and an optional Unit. Human per
 
 ## Live behavior
 
-The capture shows the initial Show snapshot. The Update control corresponds to the explicit replacement in the example, not an automatic work loop. Close freezes the last state and stops its spinner; it does not mark the download successful. StableOutput appends meaningful snapshots rather than repainting frames.
+The capture shows the initial Show snapshot. The Update control corresponds to the explicit replacement in the example, not an automatic work loop. Close freezes the last state and stops its spinner; it does not mark the download successful. Stable output appends meaningful snapshots rather than repainting frames.

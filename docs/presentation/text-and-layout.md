@@ -64,7 +64,9 @@ Automatic outer spacing adds one empty line before and after a complete multilin
 | Title, Separator | None independently; enclosing composition decides |
 | Tree nodes and individual stages | None inside the group |
 
-Adjacent and nested automatic requests collapse by maximum, not addition. Materialize a lower margin only at a boundary with following content. Coordinate complete-response spacing with those requests. BlankLine is explicit additional content. View updates do not accumulate margins. Stable output does not surround every progress event with blanks.
+Section and HelpSection request one empty line before every subsection heading, even when that subsection is the first child after the parent heading and rule. Keep each heading adjacent to its own rule. After a complete section or subsection, separate the next block by one empty line.
+
+Adjacent and nested automatic requests collapse by maximum, not addition. A subsection lower gap and the next subsection upper gap share one empty line; a parent and its final subsection share the same lower gap. Materialize a lower margin only at a boundary with following content. Coordinate complete-response spacing with those requests. BlankLine is explicit additional content. View updates do not accumulate margins. Stable output does not surround every progress event with blanks.
 
 ### Continuous rules and branches
 

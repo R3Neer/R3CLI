@@ -12,7 +12,8 @@ Presentation Components describe terminal output without printing during constru
 
 - [[docs/presentation/composition|Composition]] — membership, authoring bases and reuse.
 - [[docs/presentation/text-and-layout|Text and layout]] — Unicode, wrapping, controls and spacing.
-- [[docs/presentation/output|Output]] — Show, Update, Close, Remove and stable output.
+- [[docs/presentation/output/README|Output]] — TextWriter contexts, Show, Update, Close, Remove and stable output.
+- [[docs/presentation/architecture/README|Presentation architecture]] — design sequence and Spectre.Console rendering/detection boundary.
 - [[docs/presentation/progress-model|Progress model]] — state and counts independent of execution.
 
 ### Components

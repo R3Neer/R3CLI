@@ -79,10 +79,10 @@ classDiagram
     }
     class ActivityDisplay
     class ProgressDisplay
-    class IOutput
+    class Output
     CliNode --> CommandActivity : optional policy
-    IOutput ..> ActivityDisplay : presents
-    IOutput ..> ProgressDisplay : presents real progress
+    Output ..> ActivityDisplay : presents
+    Output ..> ProgressDisplay : presents real progress
 ```
 
 See [[docs/configuration/toml|TOML configuration]], [[docs/presentation/components/activity-display|ActivityDisplay]] and [[docs/presentation/components/progress-display|ProgressDisplay]]. `CliNode` here labels the command-base contract rather than introducing a second wrapper around commands.

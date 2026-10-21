@@ -16,7 +16,7 @@ summary.Handle.Update(new Field("Files", 25));
 handle.Close();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 
@@ -46,7 +46,8 @@ classDiagram
     IComponent <|.. View
     View o-- "0..*" IComponent : content
     View --> ViewHandle : reserved identity
-    IOutput ..> ViewHandle : mounts and updates
+    Output ..> ViewHandle : original session
+    OutputScope ..> ViewHandle : session lifetime
 ```
 
 ## Behavior and validation
@@ -85,7 +86,7 @@ handle.Close();
 
 ## Live behavior
 
-The capture shows the initial Show snapshot. The Update control corresponds to replacing Files 12 with Files 25; Close has no distinct visual appearance and freezes the region. Update can clear an active region with no replacement items. Close stops animation and does not mean success. Remove erases the owned editable region and invalidates descendants, even after Close while the representation remains owned. Repeated known Close/Remove are no-ops; updating a closed/removed handle fails. Neither operation can erase arbitrary terminal history or another application output. See [[docs/presentation/output|Output]] for the owner-bound facade.
+The capture shows the initial Show snapshot. The Update control corresponds to replacing Files 12 with Files 25; Close has no distinct visual appearance and freezes the region. Update can clear an active region with no replacement items. Close stops animation and does not mean success. Remove erases the owned editable region and invalidates descendants, even after Close while the representation remains owned. Repeated known Close/Remove are no-ops; updating a closed/removed handle fails. Neither operation can erase arbitrary terminal history or another application output. See [[docs/presentation/output/README|Output]] for the owner-bound facade.
 
 ## Additional examples
 

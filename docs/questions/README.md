@@ -13,7 +13,6 @@ Each document identifies one active design decision. Questions do not define the
 | [[docs/questions/native-aot-or-jit]] | Backend execution and distribution mode |
 | [[docs/questions/adapter-transport]] | Portable values and cross-process protocol |
 | [[docs/questions/adapter-derivation]] | Native-language reusable contract specializations |
-| [[docs/questions/default-output-scope]] | Default output ownership and session scope |
 | [[docs/questions/cli-value-types]] | Typed argument/option definitions and conversion |
 | [[docs/questions/help-option-parsing]] | Parsing boundaries for variadic help/explain sections |
 

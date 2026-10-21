@@ -12,7 +12,9 @@ This is the current specification for R3CLI's C# backend and language adapters. 
 |---|---|---|
 | Overall design | [[docs/structure]] | Data, components, output and commands in one worked example |
 | General class diagram | [[docs/class-diagram]] | Relationships between the shared API types |
-| Presentation | [[docs/presentation/README]] | Components, composition, output and layout |
+| Presentation | [[docs/presentation/README]] | Components, composition and layout |
+| Output | [[docs/presentation/output/README]] | Borrowed .NET writers, scoped sessions, capabilities and handles |
+| Presentation architecture | [[docs/presentation/architecture/README]] | Internal design sequence and Spectre.Console delegation |
 | Configuration | [[docs/configuration/README]] | Built-in themes, automatic selection, background policy and token overrides |
 | Command System | [[docs/command-system/README]] | Parent-defined commands, help, diagnostics and activity |
 | Integration | [[docs/integration/README]] | Idiomatic adapters and native structured-data boundaries |

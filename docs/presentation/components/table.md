@@ -16,7 +16,7 @@ var table = new Table(
 table.Show();
 ```
 
-Constructing the description does not print. Show is the explicit output boundary; see [[docs/presentation/output|Output]]. Columns precede rows in every construction form.
+Constructing the description does not print. Show is the explicit output boundary; see [[docs/presentation/output/README|Output]]. Columns precede rows in every construction form.
 
 ## API contract
 

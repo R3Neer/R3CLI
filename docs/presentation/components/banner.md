@@ -12,7 +12,7 @@ A title between two repeated separators, intended for explicit introductions rat
 new Banner("ModpackTools 5.0.0", new Symbol("═")).Show();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 

@@ -48,7 +48,7 @@ Primary-constructor parameters are camelCase inputs, not automatically exposed p
 | Other inline pieces | Command, Spinner, TabLeader, help syntax pieces |
 | Block-only descriptions | Title, Line, BlankLine, messages, Field, Section, Banner, LiteralBlock, Table, Tree, Diagnostic, Help, View, progress displays |
 | Argument values, not components | Symbol, Row, Column, TreeNode, TaskProgress, FrameSource |
-| Output services, not components | IOutput, Output, StableOutput |
+| Output services, not components | Output, OutputScope |
 
 BlankLine cannot be placed in Line. Line itself is not inline. A standard message accepts IMessageBody, not an arbitrary IComponent.
 
@@ -106,6 +106,6 @@ content.Show();
 
 Small immutable values with useful structural equality use readonly record structs: Symbol, TabLeader and TaskProgress. Validated constructors and get-only properties preserve their invariants; positional init properties are not introduced just to shorten the declaration. Value-type defaults have explicit documented meanings.
 
-Simple text/message descriptors remain classes and use primary constructors where that makes the input clearer. Row, Column, Table, Line, Section, Tree, Help, View, ViewHandle and StagesDisplay remain classes: collections, composition, specialization and placement identity do not become clearer merely by changing their representation. FrameSource is an abstract record, with validated sealed-record source descriptions. IOutput is an interface, Output is a static facade, and StableOutput is a stateful class.
+Simple text/message descriptors remain classes and use primary constructors where that makes the input clearer. Row, Column, Table, Line, Section, Tree, Help, View, ViewHandle and StagesDisplay remain classes: collections, composition, specialization and placement identity do not become clearer merely by changing their representation. FrameSource is an abstract record, with validated sealed-record source descriptions. Output is a static facade over scoped internal sessions; OutputScope is a sealed lifetime owner borrowing a .NET TextWriter. Spectre.Console supplies internal rendering and detection, without becoming a public component base.
 
 Value semantics do not promise zero allocations: boxing a value through object/interface storage can allocate. Consumer callbacks, terminal ownership and adapter serialization are separate concerns from C# representation.

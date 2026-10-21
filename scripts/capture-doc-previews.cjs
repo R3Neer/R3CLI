@@ -67,6 +67,38 @@ async function main() {
           }));
           if (rules.some(valid => !valid)) errors.push('Table header rule must follow headers, span the table and use subtext');
         }
+        if (slug === 'section' || slug === 'structure') {
+          const layoutErrors = await page.evaluate(() => {
+            const issues = [];
+            const gap = (before, after) => after.getBoundingClientRect().top - before.getBoundingClientRect().bottom;
+            const close = (a, b) => Math.abs(a - b) < 1;
+            for (const section of document.querySelectorAll('section.block')) {
+              const heading = section.firstElementChild;
+              const rule = heading.nextElementSibling;
+              const lineHeight = parseFloat(getComputedStyle(heading).lineHeight);
+              if (!close(gap(heading, rule), 0)) issues.push('Section heading must touch its rule');
+              for (const subsection of section.querySelectorAll(':scope > .indent > section.block')) {
+                const preceding = subsection.previousElementSibling || rule;
+                if (!close(gap(preceding, subsection), lineHeight)) issues.push('Subsection needs exactly one preceding blank line');
+              }
+              const following = section.nextElementSibling;
+              if (following && !close(gap(section, following), lineHeight)) issues.push('Completed section needs exactly one following blank line');
+            }
+            // Probe a first-child subsection and adjacent subsections as well as the visible specimen.
+            const probe = document.createElement('section');
+            probe.className = 'block';
+            probe.innerHTML = '<div class="line">Parent</div><div class="line">Rule</div><div class="indent"><section class="block"><div class="line">First</div></section><section class="block"><div class="line">Second</div></section></div>';
+            document.querySelector('.screen').append(probe);
+            const [heading, rule, body] = probe.children;
+            const [first, second] = body.children;
+            const lineHeight = parseFloat(getComputedStyle(heading).lineHeight);
+            if (!close(gap(rule, first), lineHeight)) issues.push('First-child subsection needs one blank after parent rule');
+            if (!close(gap(first, second), lineHeight)) issues.push('Adjacent subsection margins must collapse to one blank');
+            probe.remove();
+            return issues;
+          });
+          errors.push(...layoutErrors);
+        }
         const initialPreset = await page.locator('.screen').getAttribute('data-preset');
         if (initialPreset !== 'catppuccin-mocha') errors.push('Initial fixture must use Catppuccin Mocha');
         if (slug === 'structure') {

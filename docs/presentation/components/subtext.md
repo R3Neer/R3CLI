@@ -12,7 +12,7 @@ Secondary literal text, used for supporting detail without changing the meaning 
 new Line("demo", new Subtext("  local project")).Show();
 ```
 
-Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
+Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output/README|Output]].
 
 ## API contract
 
