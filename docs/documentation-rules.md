@@ -48,7 +48,7 @@ Use primary constructors to reduce syntax without silently changing named argume
 
 ## Visual evidence
 
-Each presentation-component document has exactly one representative capture, one current offline HTML preview and the C# composition represented by that preview. Use matching stems under `docs/assets/captures/` and `docs/assets/previews/`. A preview may offer several cases, content edits or live controls; its capture is deterministic. Abstract/value concepts are demonstrated through their owners or consumers rather than being given invented visual chrome.
+Each presentation-component document has exactly one representative capture, one current offline HTML preview and the C# composition represented by that preview. Use matching stems under `docs/assets/captures/` and `docs/assets/previews/`. A preview may offer several cases, content edits or live controls; its capture is deterministic. Live indicators start automatically unless reduced motion is requested. Capture tooling uses the documentary capture query to freeze the first frame; ordinary page loads animate. Abstract/value concepts are demonstrated through their owners or consumers rather than being given invented visual chrome.
 
 The combined example belongs to [[docs/structure]], with its own HTML, capture and complete composition source. Previews are documentation fixtures, not a runtime or an implementation of R3CLI. They must preserve the specified tokens, line characters, spacing and structure. Do not link obsolete prototypes.
 

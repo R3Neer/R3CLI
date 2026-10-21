@@ -1,17 +1,45 @@
 "use strict";
 const screen=document.querySelector('.screen'),initial=screen.innerHTML;
 const frames=['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
-let timer=null,frame=0,completed=12;
-function stop(){if(timer!==null)clearInterval(timer);timer=null;document.querySelector('#play')?.setAttribute('aria-pressed','false');}
-function tick(){frame=(frame+1)%frames.length;document.querySelectorAll('.frame').forEach(e=>e.textContent=frames[frame]);}
-document.querySelector('#play')?.addEventListener('click',()=>{if(timer!==null){stop();return;}timer=setInterval(tick,100);document.querySelector('#play').setAttribute('aria-pressed','true');});
-document.querySelector('#reset')?.addEventListener('click',()=>{stop();screen.innerHTML=initial;frame=0;completed=12;for(const id of ["leader-label","leader-width","leader-pattern"]){const input=document.getElementById(id);if(input)input.value=input.defaultValue;}fitRules();fitLeaders();});
-document.querySelector('#update')?.addEventListener('click',()=>{completed=25;document.querySelectorAll('.counts').forEach(e=>e.textContent='25/40 files · 63%');document.querySelectorAll('.bar').forEach(e=>{const n=13;e.replaceChildren();for(const [cls,text]of [['text','━'.repeat(n)],['muted','━'.repeat(20-n)]]){const span=document.createElement('span');span.className=cls;span.textContent=text;e.append(span);}});const activity=document.querySelector('#activity-region');if(activity)activity.innerHTML='<div class="line"><span class="success">✓</span> Resolving dependencies</div>';const stage=document.querySelector('#stage-first');if(stage)stage.innerHTML='<div class="line"><span class="success">✓</span> Resolve dependencies</div>';const view=document.querySelector('#view-region');if(view)view.innerHTML=document.body.dataset.slug==='structure'?'<div class="block task" data-progress="true"><div class="line"><span class="accent frame">⠋</span> Reading metadata <span class="muted counts">12/40 files · 30%</span></div><div class="line">  <span class="bar"><span class="text">━━━━━━</span><span class="muted">━━━━━━━━━━━━━━</span></span></div></div>':'<div class="line"><span class="muted">Files: </span>25</div>';});
-document.querySelector('#remove')?.addEventListener('click',()=>{stop();document.querySelector('#view-region')?.replaceChildren();});
+const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+const captureMode=new URLSearchParams(location.search).has('capture');
+let timer=null,frame=0,completed=12,wantsMotion=!captureMode&&!reducedMotion.matches;
+function syncMotion(){
+  const active=screen.querySelector('.frame')!==null;
+  const running=wantsMotion&&active;
+  if(running&&timer===null)timer=setInterval(tick,100);
+  if(!running&&timer!==null){clearInterval(timer);timer=null;}
+  const button=document.querySelector('#play');
+  if(button){button.disabled=!active;button.textContent=running?'Pause animation':'Play animation';button.setAttribute('aria-pressed',String(running));}
+  if(window.previewStatus)window.previewStatus.animationPaused=timer===null;
+}
+function tick(){frame=(frame+1)%frames.length;screen.querySelectorAll('.frame').forEach(e=>e.textContent=frames[frame]);}
+document.querySelector('#play')?.addEventListener('click',()=>{wantsMotion=!wantsMotion;syncMotion();});
+document.querySelector('#reset')?.addEventListener('click',()=>{
+  screen.innerHTML=initial;frame=0;completed=12;wantsMotion=!captureMode&&!reducedMotion.matches;
+  for(const id of ['leader-label','leader-width','leader-pattern']){const input=document.getElementById(id);if(input)input.value=input.defaultValue;}
+  fitRules();fitLeaders();syncMotion();
+});
+document.querySelector('#update')?.addEventListener('click',()=>{
+  completed=25;
+  screen.querySelectorAll('.counts').forEach(e=>e.textContent='25/40 files · 63%');
+  screen.querySelectorAll('.bar').forEach(e=>{e.replaceChildren();for(const [cls,text]of [['text','━'.repeat(13)],['muted','━'.repeat(7)]]){const span=document.createElement('span');span.className=cls;span.textContent=text;e.append(span);}});
+  const activity=document.querySelector('#activity-region');
+  if(activity)activity.innerHTML='<div class="line"><span class="success">✓</span> Resolving dependencies</div>';
+  const stage=document.querySelector('#stage-first');
+  if(stage)stage.innerHTML='<div class="line"><span class="success">✓</span> Resolve dependencies</div>';
+  const view=document.querySelector('#view-region');
+  if(view)view.innerHTML=document.body.dataset.slug==='structure'?'<div class="block task" data-progress="true"><div class="line"><span class="accent frame">⠋</span> Reading metadata <span class="muted counts">12/40 files · 30%</span></div><div class="line">  <span class="bar"><span class="text">━━━━━━</span><span class="muted">━━━━━━━━━━━━━━</span></span></div></div>':'<div class="line"><span class="muted">Files: </span>25</div>';
+  syncMotion();
+});
+document.querySelector('#remove')?.addEventListener('click',()=>{document.querySelector('#view-region')?.replaceChildren();syncMotion();});
+reducedMotion.addEventListener('change',()=>{wantsMotion=!captureMode&&!reducedMotion.matches;syncMotion();});
+window.addEventListener('pagehide',()=>{if(timer!==null)clearInterval(timer);timer=null;});
+
 document.querySelector('#content')?.addEventListener('input',e=>{const first=screen.querySelector('.line');const target=first?.querySelector('span')||first;if(target)target.textContent=e.target.value;});
 function fitRules(){document.querySelectorAll('.rule').forEach(e=>{const span=e.firstElementChild;const canvas=document.createElement('canvas');const ctx=canvas.getContext('2d');ctx.font=getComputedStyle(span).font;const capacity=Math.max(0,Math.floor((e.getBoundingClientRect().width+0.01)/ctx.measureText('M').width));span.textContent=repeatPattern(e.dataset.pattern,capacity,false).replace(/ +$/u,'');});}
 new ResizeObserver(()=>{fitRules();fitLeaders();}).observe(screen);
-document.fonts.ready.then(()=>{fitRules();fitLeaders();window.previewStatus={ready:true,animationPaused:true};});
+document.fonts.ready.then(()=>{fitRules();fitLeaders();window.previewStatus={ready:true,animationPaused:true};syncMotion();});
 
 // Documentary browser approximation of terminal cells, not backend layout code.
 function cellWidth(text) {

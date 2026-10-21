@@ -26,7 +26,7 @@ async function main() {
   try {
     for (const name of pages) {
       const slug = path.basename(name, '.html');
-      const page = await browser.newPage({ viewport: { width: 1120, height: 820 }, deviceScaleFactor: 1 });
+      const page = await browser.newPage({ viewport: { width: 1120, height: 820 }, deviceScaleFactor: 1, reducedMotion: "no-preference" });
       const errors = [];
       page.on('pageerror', error => errors.push(error.message));
       page.on('requestfailed', request => errors.push(`${request.url()}: ${request.failure()?.errorText}`));
@@ -34,8 +34,22 @@ async function main() {
         if (/^https?:/.test(request.url())) errors.push(`Nonlocal preview request: ${request.url()}`);
       });
       try {
-        await page.goto(pathToFileURL(path.join(previewDirectory, name)).href);
+        const url = pathToFileURL(path.join(previewDirectory, name)).href;
+        await page.goto(url);
         await page.waitForFunction(() => window.previewStatus?.ready);
+        if (await page.locator('.frame').count()) {
+          if (await page.locator('#play').getAttribute('aria-pressed') !== 'true') errors.push('Live indicators did not start automatically');
+          const before = await page.locator('.frame').first().textContent();
+          await page.waitForFunction(previous => document.querySelector('.frame')?.textContent !== previous, before);
+        }
+        if (slug === 'spinner') {
+          await page.emulateMedia({ reducedMotion: 'reduce' });
+          await page.waitForFunction(() => window.previewStatus.animationPaused);
+          await page.emulateMedia({ reducedMotion: 'no-preference' });
+        }
+        await page.goto(url + '?capture=1');
+        await page.waitForFunction(() => window.previewStatus?.ready);
+        if (!(await page.evaluate(() => window.previewStatus.animationPaused))) errors.push('Capture mode did not freeze the first frame');
         await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         await page.locator('main').screenshot({ path: path.join(captureDirectory, `${slug}.png`) });
         const wide = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }));
@@ -119,12 +133,6 @@ async function main() {
           const reset = await page.locator('[data-leader] .leader-fill').first().textContent();
           if (reset !== '.......') errors.push('TabLeader reset did not restore the fixture');
         }
-        if (await page.locator('#update').count()) {
-          const before = await page.locator('.screen').textContent();
-          await page.locator('#update').click();
-          const after = await page.locator('.screen').textContent();
-          if (before === after) errors.push('Update did not change displayed content');
-        }
         if (await page.locator('#play').count()) {
           await page.locator('#play').click();
           if (await page.locator('.frame').count()) {
@@ -132,9 +140,23 @@ async function main() {
             await page.waitForFunction(previous => document.querySelector('.frame')?.textContent !== previous, before);
           }
           await page.locator('#play').click();
+          const frozen = await page.locator('.frame').first().textContent();
+          await page.waitForTimeout(220);
+          if (await page.locator('.frame').first().textContent() !== frozen) errors.push('Pause did not freeze the indicator');
+        }
+        if (await page.locator('#update').count()) {
+          const before = await page.locator('.screen').textContent();
+          await page.locator('#update').click();
+          const after = await page.locator('.screen').textContent();
+          if (before === after) errors.push('Update did not change displayed content');
         }
         if (await page.locator('#remove').count()) {
+          if (slug === 'structure') await page.locator('#play').click();
           await page.locator('#remove').click();
+          if (slug === 'structure') {
+            const before = await page.locator('.frame').first().textContent();
+            await page.waitForFunction(previous => document.querySelector('.frame')?.textContent !== previous, before);
+          }
           if (await page.locator('#view-region').count()) {
             const remaining = await page.locator('#view-region').textContent();
             if (remaining.trim()) errors.push('Remove left view content visible');
