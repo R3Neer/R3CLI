@@ -12,9 +12,9 @@ A compact textual label/value pair. Scalar wrappers are unnecessary for this pre
 var dotted = new TabLeader(14, new Symbol("."));
 Output.Show(
     new Field("Project", "demo"),
-    new Field("Files", "12"),
+    new Field("Files", 12),
     new Field("Project", "demo", dotted),
-    new Field("Files", "12", dotted));
+    new Field("Files", 12, dotted));
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -26,8 +26,10 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public sealed class Field : IComponent
 {
-    public Field(string label, string value, TabLeader? separator = null);
+    public Field(string label, object? value, TabLeader? separator = null);
     public string Label { get; }
+    public object? OriginalValue { get; }
+    public Type? OriginalType { get; }
     public string Value { get; }
     public TabLeader? Separator { get; }
 }
@@ -35,7 +37,7 @@ public sealed class Field : IComponent
 
 ## Composition
 
-Composes a secondary label and separator followed by normal text. Omission of separator produces the ordinary colon and space. An explicit TabLeader replaces that complete colon-and-space sequence. Values here are textual; use Table or an application data model to retain typed domain values.
+Composes a secondary label and separator followed by normal text. Omission of separator produces the ordinary colon and space. An explicit TabLeader replaces that complete colon-and-space sequence. The value uses the shared TextBase conversion policy and retains its original value and type; this does not turn a label/value presentation into a domain record.
 
 ```mermaid
 classDiagram
@@ -47,7 +49,7 @@ classDiagram
 
 ## Behavior and validation
 
-Label and value are non-null single logical lines with well-formed Unicode and no controls. Do not parse values or infer commands. The value is a string, not a new Scalar type. A supplied TabLeader must satisfy its width and optional-Symbol invariants; default(TabLeader) is valid and adds a space, whereas an explicitly supplied default(Symbol) is invalid. There is no independent Field labelWidth option.
+Label remains a non-null structural string. Capture the value using the shared conversion policy in [[docs/presentation/composition|Composition]], then require its text to be one logical line with well-formed Unicode and no controls. Do not parse values or infer commands. No Scalar wrapper is required. A supplied TabLeader must satisfy its width and optional-Symbol invariants; default(TabLeader) is valid and adds a space, whereas an explicitly supplied default(Symbol) is invalid. There is no independent Field labelWidth option.
 
 ## Presentation
 
@@ -78,7 +80,7 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 var dotted = new TabLeader(14, new Symbol("."));
 Output.Show(
     new Field("Project", "demo"),
-    new Field("Files", "12"),
+    new Field("Files", 12),
     new Field("Project", "demo", dotted),
-    new Field("Files", "12", dotted));
+    new Field("Files", 12, dotted));
 ```

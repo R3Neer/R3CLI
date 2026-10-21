@@ -9,10 +9,10 @@ An explicitly identified group of ordered components. It supplies a single place
 ## Usage
 
 ```csharp
-var summary = new View(new Field("Files", "12"));
+var summary = new View(new Field("Files", 12));
 var group = new View(new Title("Project report"), summary);
 var handle = group.Show();
-summary.Handle.Update(new Field("Files", "25"));
+summary.Handle.Update(new Field("Files", 25));
 handle.Close();
 ```
 
@@ -25,7 +25,8 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public sealed class View : IComponent
 {
-    public View(params IComponent[] content);
+    public View(params IEnumerable<ComponentInput> content);
+    public View(IEnumerable<IComponent> content);
     public IReadOnlyList<IComponent> InitialContent { get; }
     public ViewHandle Handle { get; }
 }
@@ -38,7 +39,7 @@ public sealed class ViewHandle
 
 ## Composition
 
-View accepts arbitrary ordered IComponent children, including nested Views. Ordinary reusable descriptions have no handle; an explicit View reserves one. Show also returns a root handle covering its arguments.
+View accepts strings as Text and arbitrary ordered IComponent children, including nested Views. Ordinary reusable descriptions have no handle; an explicit View reserves one. Show also returns a root handle covering its arguments.
 
 ```mermaid
 classDiagram
@@ -50,7 +51,7 @@ classDiagram
 
 ## Behavior and validation
 
-Snapshot InitialContent. Reserved handles become usable after mounting. A View has one placement lifetime and cannot form cycles. Updating replaces content, returns the same handle and preserves explicitly retained identical child Views. Removed child Views are invalidated.
+Normalize input strings to Text; reject null/default inputs. Existing component sequences use the collection overload without element wrapping. Empty calls select the variadic overload; use a typed collection for explicit empty sequences. Snapshot InitialContent. Reserved handles become usable after mounting. A View has one placement lifetime and cannot form cycles. Updating replaces content, returns the same handle and preserves explicitly retained identical child Views. Removed child Views are invalidated.
 
 ## Presentation
 
@@ -75,13 +76,23 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
-var summary = new View(new Field("Files", "12"));
+var summary = new View(new Field("Files", 12));
 var group = new View(new Title("Project report"), summary);
 var handle = group.Show();
-summary.Handle.Update(new Field("Files", "25"));
+summary.Handle.Update(new Field("Files", 25));
 handle.Close();
 ```
 
 ## Live behavior
 
 The capture shows the initial Show snapshot. The Update control corresponds to replacing Files 12 with Files 25; Close has no distinct visual appearance and freezes the region. Update can clear an active region with no replacement items. Close stops animation and does not mean success. Remove erases the owned editable region and invalidates descendants, even after Close while the representation remains owned. Repeated known Close/Remove are no-ops; updating a closed/removed handle fails. Neither operation can erase arbitrary terminal history or another application output. See [[docs/presentation/output|Output]] for the owner-bound facade.
+
+## Additional examples
+
+```csharp
+var summary = new View("Project ready", new Field("Files", 12));
+IEnumerable<IComponent> blocks = [new Title("Report"), summary];
+var report = new View(blocks);
+```
+
+Strings become Text, never Subtext. The input union is not stored as part of the mounted View identity.

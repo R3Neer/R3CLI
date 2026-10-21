@@ -12,21 +12,25 @@ Own placement, handle lifetimes and output routing. Constructors provide descrip
 
 ## API contract
 
-These declarations describe the accepted surface, not an implementation. Extension blocks illustrate the recent C# facade shape; the exact SDK baseline is a [[docs/questions/dotnet-version|separate decision]].
+These declarations describe the accepted surface, not an implementation. Input unions and extension blocks use the [[docs/integration/build-baseline|C# 15 preview build baseline]].
 
 ```csharp
 public interface IOutput
 {
-    ViewHandle Show(params IComponent[] content);
-    ViewHandle Update(ViewHandle view, params IComponent[] content);
+    ViewHandle Show(params IEnumerable<ComponentInput> content);
+    ViewHandle Show(IEnumerable<IComponent> content);
+    ViewHandle Update(ViewHandle view, params IEnumerable<ComponentInput> content);
+    ViewHandle Update(ViewHandle view, IEnumerable<IComponent> content);
     void Close(ViewHandle view);
     void Remove(ViewHandle view);
 }
 
 public static class Output
 {
-    public static ViewHandle Show(params IComponent[] content);
-    public static ViewHandle Update(ViewHandle view, params IComponent[] content);
+    public static ViewHandle Show(params IEnumerable<ComponentInput> content);
+    public static ViewHandle Show(IEnumerable<IComponent> content);
+    public static ViewHandle Update(ViewHandle view, params IEnumerable<ComponentInput> content);
+    public static ViewHandle Update(ViewHandle view, IEnumerable<IComponent> content);
     public static void Close(ViewHandle view);
     public static void Remove(ViewHandle view);
 
@@ -37,7 +41,8 @@ public static class Output
 
     extension(ViewHandle view)
     {
-        public ViewHandle Update(params IComponent[] content);
+        public ViewHandle Update(params IEnumerable<ComponentInput> content);
+        public ViewHandle Update(IEnumerable<IComponent> content);
         public void Close();
         public void Remove();
     }
@@ -46,8 +51,10 @@ public static class Output
 public sealed class StableOutput : IOutput
 {
     public StableOutput(TextWriter writer);
-    public ViewHandle Show(params IComponent[] content);
-    public ViewHandle Update(ViewHandle view, params IComponent[] content);
+    public ViewHandle Show(params IEnumerable<ComponentInput> content);
+    public ViewHandle Show(IEnumerable<IComponent> content);
+    public ViewHandle Update(ViewHandle view, params IEnumerable<ComponentInput> content);
+    public ViewHandle Update(ViewHandle view, IEnumerable<IComponent> content);
     public void Close(ViewHandle view);
     public void Remove(ViewHandle view);
 }
@@ -79,7 +86,7 @@ A static class cannot implement IOutput. Stateful implementations own sessions; 
 
 An empty Show creates a zero-height handle. Empty Update clears an active region without closing it. Repeated known Close/Remove are no-ops. Updating a closed or removed handle fails. Explicit nested Views retain identity only while the same child View remains present. Neither Close nor Remove signals success.
 
-Each Show argument begins a block, not necessarily one physical row. Use Line to join inline pieces. Validate descriptions before emitting; I/O can still fail after output starts. An implementation does not own arbitrary terminal scrollback, prompts or another program's writes.
+String arguments normalize to Text; existing component sequences use the typed collection overload. Reject null/default union inputs. Each Show argument begins a block, not necessarily one physical row. Use Line to join inline pieces. Validate descriptions before emitting; I/O can still fail after output starts. An implementation does not own arbitrary terminal scrollback, prompts or another program's writes.
 
 ## Stable output
 

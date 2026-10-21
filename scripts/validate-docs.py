@@ -168,6 +168,12 @@ def check(root: Path) -> dict:
                 parsed = tomllib.loads(examples[0])
                 if set(parsed.get("tokens", {})) != TOKENS:
                     fail(config, "example must contain exactly the eight standard tokens")
+                alignment = parsed.get("presentation", {}).get("table", {}).get("alignment", {})
+                expected_alignment = {"headers", "number", "text", "boolean", "date-time", "duration", "other", "mixed"}
+                if set(alignment) != expected_alignment or any(value not in {"left", "center", "right"} for value in alignment.values()):
+                    fail(config, "table alignment must define the accepted categories with concrete left/center/right values")
+                if alignment.get("headers") != "center" or alignment.get("number") != "right":
+                    fail(config, "schema example must show centered headers and right-aligned numbers")
                 if "theme" in parsed:
                     fail(config, "named themes are outside the current schema")
             except tomllib.TOMLDecodeError as error:
@@ -180,11 +186,28 @@ def check(root: Path) -> dict:
             r"public\s+Symbol\?\s+Symbol\s*\{\s*get;\s*\}",
         ),
         "presentation/components/field.md": (
-            r"public\s+Field\(string\s+label,\s*string\s+value,\s*TabLeader\?\s+separator\s*=\s*null\)",
+            r"public\s+Field\(string\s+label,\s*object\?\s+value,\s*TabLeader\?\s+separator\s*=\s*null\)",
         ),
         "presentation/components/table.md": (
-            r"public\s+Table\(IEnumerable<Row>\s+rows,\s*params\s+Column\[\]\s+columns\)",
-            r"public\s+Table\(IEnumerable<Row>\s+rows,\s*IEnumerable<string>\s+columns\)",
+            r"public\s+Table\(IEnumerable<Column>\s+columns,\s*Row\s+firstRow,\s*params\s+IEnumerable<Row>\s+remainingRows\)",
+            r"public\s+Table\(IEnumerable<string>\s+columns,\s*IEnumerable<Row>\s+rows\)",
+        ),
+        "presentation/composition.md": (
+            r"public\s+union\s+InlineInput\(IInlineContent,\s*string\)",
+            r"public\s+union\s+ComponentInput\(IComponent,\s*string\)",
+            r"public\s+object\?\s+OriginalValue\s*\{\s*get;\s*\}",
+            r"public\s+Type\?\s+OriginalType\s*\{\s*get;\s*\}",
+        ),
+        "presentation/components/text.md": (
+            r"public\s+static\s+implicit\s+operator\s+Text\(string\s+value\)",
+        ),
+        "presentation/components/line.md": (
+            r"public\s+Line\(params\s+IEnumerable<InlineInput>\s+items\)",
+            r"public\s+Line\(IEnumerable<IInlineContent>\s+items\)",
+        ),
+        "presentation/components/view.md": (
+            r"public\s+View\(params\s+IEnumerable<ComponentInput>\s+content\)",
+            r"public\s+View\(IEnumerable<IComponent>\s+content\)",
         ),
         "presentation/components/symbol.md": (
             r"public\s+readonly\s+record\s+struct\s+Symbol\b",
@@ -219,6 +242,14 @@ def check(root: Path) -> dict:
         for pattern in patterns:
             if not re.search(pattern, api):
                 fail(path, f"API invariant not represented: {pattern}")
+    subtext = (docs / "presentation/components/subtext.md").read_text(encoding="utf-8-sig")
+    if re.search(r"implicit\s+operator\s+Subtext", subtext):
+        fail(docs / "presentation/components/subtext.md", "Subtext must require explicit construction")
+    table_api = (docs / "presentation/components/table.md").read_text(encoding="utf-8-sig")
+    if re.search(r"public\s+Table\(IEnumerable<Row>\s+rows", table_api):
+        fail(docs / "presentation/components/table.md", "Table construction must put columns first")
+    if (docs / "questions/dotnet-version.md").exists():
+        fail(docs / "questions/dotnet-version.md", "the C# 15 preview baseline is resolved")
     for relative in ("presentation/components/view.md", "presentation/components/tree.md", "presentation/components/stages-display.md", "presentation/output.md"):
         path = docs / relative
         if path.exists():

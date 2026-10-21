@@ -27,7 +27,7 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public sealed class StagesDisplay : IComponent
 {
-    public StagesDisplay(string title, params TaskDisplay[] stages);
+    public StagesDisplay(string title, params IEnumerable<TaskDisplay> stages);
     public string Title { get; }
     public IReadOnlyList<View> Stages { get; }
 }

@@ -34,6 +34,14 @@ classDiagram
     IMessageBody <|.. Text
     IMessageBody <|.. Subtext
     IInlineContent <|.. Command
+    class InlineInput { <<union>> }
+    class ComponentInput { <<union>> }
+    InlineInput ..> IInlineContent : component case
+    InlineInput ..> String : text case
+    ComponentInput ..> IComponent : component case
+    ComponentInput ..> String : text case
+    Line ..> InlineInput : construction
+    View ..> ComponentInput : construction
     IComponent <|.. Line
     Line o-- IInlineContent
     IComponent <|.. BlankLine
@@ -64,9 +72,14 @@ classDiagram
     Banner o-- Title
     IComponent <|.. LiteralBlock
     IComponent <|.. Table
-    Table o-- Row
+    Table o-- "1..*" Row
     Table o-- Column
     Table ..> Separator : header rule
+    class ColumnTData["Column<TData>"]
+    Table ..> ColumnTData : source selectors
+    Column --> Alignment
+    ColumnTData --> Alignment
+    Row --> Object : retained source
     Column ..> Row : selects value
     Column ..> IInlineContent : presentation
     IComponent <|.. Tree

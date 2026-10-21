@@ -42,7 +42,7 @@ Define the relevant template before instantiating a document. Required sections 
 
 A document owns one public concept, including its supporting types: Table owns Row/Column; Tree owns its node bases. Link to other concepts instead of maintaining duplicate contract definitions. Include a class diagram whenever the document covers several related types. The general diagram is [[docs/class-diagram]].
 
-API extracts may omit method bodies; identify them as contract extracts rather than a compiling project. Use modern stable C# where useful. Do not introduce methods, inheritance, defaults or transport guarantees that have not been decided. C# examples must follow the declared composition memberships; in particular BlankLine is block-only and cannot be supplied to Line.
+API extracts may omit method bodies; identify them as contract extracts rather than a compiling project. Use C# 15 preview as specified in [[docs/integration/build-baseline|Build baseline]] where useful. Do not introduce methods, inheritance, defaults or transport guarantees that have not been decided. C# examples must follow the declared composition memberships; in particular BlankLine is block-only and cannot be supplied to Line.
 
 Use primary constructors to reduce syntax without silently changing named arguments, public properties, identity or validation. A class primary parameter is not automatically a property. Use records for specified value equality, not as a universal shorthand for every class. Get-only record properties retain validated values; positional notation must not expose an `init`/`with` route around invariants. Arrays, lists and delegates do not acquire deep semantic equality merely by belonging to a record. Preserve positional deconstruction where it is already part of the contract.
 
@@ -60,7 +60,7 @@ An unresolved decision has one document under `docs/questions/`, using the quest
 
 ## Publication checks
 
-Check metadata, required sections, unique H1 titles, local links and image targets, balanced code fences, related-type diagrams, exactly eight standard tokens, current HTML/capture pairs and absence of template placeholders. Verify HTML with a real browser, including interaction and overflow. Review API/examples against the accepted contract. Documentation checks do not imply library compilation, native-shell tests or runtime implementation.
+Check input-union normalization, string -> Text only, nonempty table rows, columns-first signatures and concrete TOML alignment values. Check metadata, required sections, unique H1 titles, local links and image targets, balanced code fences, related-type diagrams, exactly eight standard tokens, current HTML/capture pairs and absence of template placeholders. Verify HTML with a real browser, including interaction and overflow. Review API/examples against the accepted contract. Documentation checks do not imply library compilation, native-shell tests or runtime implementation.
 
 Run the standard-library checker from the repository root:
 

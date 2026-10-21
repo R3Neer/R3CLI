@@ -25,11 +25,13 @@ public sealed class Help : IComponent
 {
     public string Description { get; }
     public IReadOnlyList<HelpSection> Sections { get; }
-    public Help SelectSections(params string[] ids);
+    public Help SelectSections(params IEnumerable<string> ids);
 }
 
 public abstract class HelpSection : Section
 {
+    protected HelpSection(string id, string title,
+        params IEnumerable<ComponentInput> children);
     protected HelpSection(string id, string title,
         IEnumerable<IComponent> children);
     public string Id { get; }
@@ -37,7 +39,8 @@ public abstract class HelpSection : Section
 
 public sealed class HelpBuilder
 {
-    public void AddContent(string sectionId, params IComponent[] content);
+    public void AddContent(string sectionId, params IEnumerable<ComponentInput> content);
+    public void AddContent(string sectionId, IEnumerable<IComponent> content);
     public void AddSection(HelpSection section, string? after = null);
 }
 
@@ -48,15 +51,17 @@ protected virtual void ConfigureHelp(HelpBuilder help);
 // Inline syntax constructor extracts:
 public OptionName(string name);
 public ArgumentName(string name);
-public SyntaxSequence(params IInlineContent[] items);
-public Optional(IInlineContent item);
-public Repeated(IInlineContent item);
-public Alternatives(params IInlineContent[] items);
+public SyntaxSequence(params IEnumerable<InlineInput> items);
+public SyntaxSequence(IEnumerable<IInlineContent> items);
+public Optional(InlineInput item);
+public Repeated(InlineInput item);
+public Alternatives(params IEnumerable<InlineInput> items);
+public Alternatives(IEnumerable<IInlineContent> items);
 ```
 
 ## Composition
 
-HelpSection inherits Section geometry and adds a stable Id distinct from Title. Standard classes/IDs are UsageSection/usage, SubcommandsSection/subcommands, ParametersSection/parameters, OptionsSection/options, ExamplesSection/examples, InputOutputSection/io and NotesSection/notes. CommandHelp and DiagnosticHelp are generation templates, not two incompatible renderers. Six inline syntax pieces compose usage: OptionName, ArgumentName, SyntaxSequence, Optional, Repeated and Alternatives.
+HelpSection inherits Section geometry and adds a stable Id distinct from Title. Standard classes/IDs are UsageSection/usage, SubcommandsSection/subcommands, ParametersSection/parameters, OptionsSection/options, ExamplesSection/examples, InputOutputSection/io and NotesSection/notes. CommandHelp and DiagnosticHelp are generation templates, not two incompatible renderers. Inline/component input unions normalize strings to Text at authoring boundaries; typed collection overloads accept existing component sequences. Syntax arity and validation apply after normalization. Six inline syntax pieces compose usage: OptionName, ArgumentName, SyntaxSequence, Optional, Repeated and Alternatives.
 
 ```mermaid
 classDiagram

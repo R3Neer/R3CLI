@@ -23,6 +23,6 @@ This is the current specification for R3CLI's C# backend and language adapters. 
 
 Start with Structure and the general diagram. Open the relevant Presentation Component page for its contract, examples and preview. Configuration controls presentation without changing component meaning. Command System integrates definitions and execution with presentation; Integration separates native data from human terminal output.
 
-Use [[docs/presentation/components/tab-leader|TabLeader]] for a shared target width with spaces or a Symbol pattern. [[docs/presentation/components/table|Table]] accepts rows followed by explicit Columns or header strings; both forms retain the same Row contract.
+Use [[docs/presentation/components/tab-leader|TabLeader]] for a shared target width with spaces or a Symbol pattern. [[docs/presentation/components/table|Table]] accepts explicit Columns or header strings followed by at least one data row. Its source-selector factory accepts existing application objects without manual Row conversion.
 
 Documents contain the current contract only. Questions have their own documents and do not silently define reference behavior. Template definitions are under `docs/templates/`; the sole metadata property is `type`.

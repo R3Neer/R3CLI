@@ -8,6 +8,8 @@ R3CLI has a shared C# backend and idiomatic language-facing adapters. Integratio
 
 ## Contents
 
+- [[docs/integration/build-baseline|Build baseline]] defines C# 15 preview and compiler verification.
+
 - [[docs/integration/adapter-boundaries|Adapter boundaries]] — supported responsibilities, customization and structured data.
 
 ## Reading guide

@@ -12,7 +12,7 @@ A titled block that organizes children, computes its visual depth from nesting a
 new Section("Project", 3,
     new Field("Name", "demo"),
     new Section("Content",
-        new Field("Files", "12"),
+        new Field("Files", 12),
         new Section("Validation", new Success("Checks passed."))))
     .Show();
 ```
@@ -26,8 +26,10 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public class Section : IComponent
 {
-    public Section(string title, params IComponent[] children);
-    public Section(string title, int count, params IComponent[] children);
+    public Section(string title, params IEnumerable<ComponentInput> children);
+    public Section(string title, int count, params IEnumerable<ComponentInput> children);
+    public Section(string title, IEnumerable<IComponent> children);
+    public Section(string title, int count, IEnumerable<IComponent> children);
     public string Title { get; }
     public int? Count { get; }
     public IReadOnlyList<IComponent> Children { get; }
@@ -36,7 +38,7 @@ public class Section : IComponent
 
 ## Composition
 
-Children are arbitrary supported IComponent blocks, including sections. HelpSection specializes Section and retains its geometry. Descriptions store no mutable parent or level.
+Strings normalize to Text through ComponentInput. Collection overloads accept existing component sequences directly. Children are arbitrary supported IComponent blocks, including sections. HelpSection specializes Section and retains its geometry. Descriptions store no mutable parent or level.
 
 ```mermaid
 classDiagram
@@ -78,7 +80,7 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 new Section("Project", 3,
     new Field("Name", "demo"),
     new Section("Content",
-        new Field("Files", "12"),
+        new Field("Files", 12),
         new Section("Validation", new Success("Checks passed."))))
     .Show();
 ```

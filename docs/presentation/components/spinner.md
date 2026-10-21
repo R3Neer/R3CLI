@@ -11,7 +11,7 @@ An inline activity animation with a default frame sequence. Frame selection can 
 ```csharp
 new Line(
     new Spinner(new TimedFrames(100)),
-    new Text(" Resolving dependencies")).Show();
+    " Resolving dependencies").Show();
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -87,7 +87,7 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ```csharp
 new Line(
     new Spinner(new TimedFrames(100)),
-    new Text(" Resolving dependencies")).Show();
+    " Resolving dependencies").Show();
 ```
 
 ## Live behavior

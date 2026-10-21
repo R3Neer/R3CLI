@@ -80,7 +80,7 @@ Tree uses one consistent light box-drawing family: │, ─, ├ and └. Each n
 
 ```csharp
 Output.Show(
-    new Line(new Text("Name: "), new Subtext("demo")),
+    new Line("Name: ", new Subtext("demo")),
     new BlankLine(),
     new LiteralBlock("Name    Status\ndemo    ready"));
 ```

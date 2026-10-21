@@ -10,7 +10,7 @@ An ordered inline composition represented as one block. A logical line may wrap 
 
 ```csharp
 new Line(
-    new Text("Project: "),
+    "Project: ",
     new Command("demo"),
     new Subtext("  selected")).Show();
 ```
@@ -24,18 +24,19 @@ These are API extracts, not implementation bodies or a compiling source file.
 ```csharp
 public sealed class Line : IComponent
 {
-    public Line(params IInlineContent[] items);
+    public Line(params IEnumerable<InlineInput> items);
+    public Line(IEnumerable<IInlineContent> items);
     public IReadOnlyList<IInlineContent> Items { get; }
 }
 ```
 
 ## Composition
 
-Items must implement IInlineContent. Text, Subtext, Command, Spinner, TabLeader and supported inline syntax pieces qualify. Line itself is not IInlineContent. BlankLine, Title, Section and standard messages cannot be inserted.
+Items normalize from string or IInlineContent and are stored as IInlineContent. Text, Subtext, Command, Spinner, TabLeader and supported inline syntax pieces qualify. Line itself is not IInlineContent. BlankLine, Title, Section and standard messages cannot be inserted.
 
 ## Behavior and validation
 
-Snapshot the ordered input sequence. Null arrays/items are invalid. Preserve item order and do not insert implicit spaces between pieces. An empty sequence has no visible inline content.
+Normalize input strings to Text; reject null/default inputs. Existing component sequences use the collection overload without element wrapping. Empty calls select the variadic overload; use a typed collection for explicit empty sequences. Snapshot the ordered input sequence. Null arrays/items are invalid. Preserve item order and do not insert implicit spaces between pieces. An empty sequence has no visible inline content.
 
 ## Presentation
 
@@ -61,7 +62,18 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 
 ```csharp
 new Line(
-    new Text("Project: "),
+    "Project: ",
     new Command("demo"),
     new Subtext("  selected")).Show();
+```
+
+## Additional examples
+
+```csharp
+IEnumerable<IInlineContent> pieces =
+    [new Command("demo"), new Subtext(" selected")];
+var fromSequence = new Line(pieces);
+var mixed = new Line("Project: ", new Command("demo"));
+// Invalid: BlankLine is block-only.
+// new Line(new BlankLine());
 ```

@@ -29,7 +29,7 @@ public enum DiagnosticLevel { Info, Success, Warning, Error }
 public sealed class Diagnostic : IComponent
 {
     public Diagnostic(DiagnosticLevel level, string code, string message,
-        string? details = null, IInlineContent? recovery = null);
+        string? details = null, InlineInput? recovery = null);
     public DiagnosticLevel Level { get; }
     public string Code { get; }
     public string Message { get; }
@@ -51,7 +51,7 @@ classDiagram
 
 ## Behavior and validation
 
-Reject undefined enum values. Code is stable, nonblank and single-line, without whitespace, controls or literal brackets. Message is nonblank single-line text without outer whitespace. Optional details use null for absence; non-null blank content is invalid and multiline content follows shared text rules. Recovery is a nonblank single-line inline description, preserving its meaning. Never automatically execute it or expose a stack trace.
+Reject undefined enum values. Code is stable, nonblank and single-line, without whitespace, controls or literal brackets. Message is nonblank single-line text without outer whitespace. Optional details use null for absence; non-null blank content is invalid and multiline content follows shared text rules. An absent Recovery is null; a supplied InlineInput must not be default/null and strings normalize to Text before storage as IInlineContent. Recovery is a nonblank single-line inline description, preserving its meaning. Never automatically execute it or expose a stack trace.
 
 ## Presentation
 

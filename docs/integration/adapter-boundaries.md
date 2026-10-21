@@ -15,11 +15,11 @@ C# is the shared backend language and the notation for official contracts. Pytho
 | Backend | Validated component model, rendering, measurement and output lifetime |
 | Command executor | Handler lifecycle, cancellation, diagnostics and automatic-feedback coordination |
 
-Constructors describe content; they do not print. Data, presentation, output identity and command execution remain separate. The exact .NET baseline is addressed in [[docs/questions/dotnet-version|.NET version]] and deployment in [[docs/questions/native-aot-or-jit|Native AOT or JIT]].
+Constructors describe content; they do not print. Data, presentation, output identity and command execution remain separate. The exact .NET baseline is addressed in [[docs/integration/build-baseline|Build baseline]] and deployment in [[docs/questions/native-aot-or-jit|Native AOT or JIT]].
 
 ## Rules
 
-Native records and arrays must be usable as table rows without manually creating CLR `Row` instances. Trees may retain arrays, dictionaries, scalars or consumer objects and derive children explicitly. A stored value does not automatically become a child relationship.
+Input unions normalize strings to Text only, never to Subtext. Native value-to-text conversion preserves original logical type information and captures display text once. Tables require at least one data row, take columns before rows, and classify Auto alignment from original values rather than formatted strings. Source selectors preserve complete source objects separately from selected cells. Native records and arrays must be usable as table rows without manually creating CLR `Row` instances. Trees may retain arrays, dictionaries, scalars or consumer objects and derive children explicitly. A stored value does not automatically become a child relationship.
 
 ## Example
 
@@ -27,10 +27,10 @@ The C# usage below describes a typed presentation callback:
 
 ```csharp
 var table = new Table(
-    [new Row("README.md", 2048L)],
-    new Column("Name", index: 0),
-    Column.For<long>("Size", index: 1,
-        presentation: bytes => new Subtext($"{bytes / 1024} KiB")));
+    [new Column("Name", index: 0),
+     Column.For<long>("Size", index: 1,
+         presentation: bytes => new Subtext($"{bytes / 1024} KiB"))],
+    new Row("README.md", 2048L));
 ```
 
 The original numeric value remains 2048. A native adapter offers its own function form; the design does not require sending a CLR delegate across processes. Callbacks execute where their state lives and communicate supported descriptions or values.

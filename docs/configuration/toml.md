@@ -20,6 +20,16 @@ motion = "auto"
 multiline-spacing = true
 auto-activity-after-ms = 500
 
+[presentation.table.alignment]
+headers = "center"
+number = "right"
+text = "left"
+boolean = "left"
+date-time = "left"
+duration = "left"
+other = "left"
+mixed = "left"
+
 [tokens]
 "text.foreground" = "#E8ECF2"
 "subtext.foreground" = "#99A3B2"
@@ -41,11 +51,18 @@ auto-activity-after-ms = 500
 | `output.motion` | `"auto"`, `"always"`, `"never"` | `"auto"` | Dynamic presentation preference |
 | `output.multiline-spacing` | Boolean | `true` | Outer spacing for a complete multiline human response |
 | `output.auto-activity-after-ms` | Nonnegative integer or `false` | `500` | Automatic command activity delay; `false` disables it |
+| `presentation.table.alignment.headers` | `"left"`, `"center"`, `"right"` | `"center"` | Header alignment within each measured column |
+| `presentation.table.alignment.number` | `"left"`, `"center"`, `"right"` | `"right"` | Auto alignment for numeric columns |
+| `presentation.table.alignment.text`, `.boolean`, `.date-time`, `.duration`, `.other`, `.mixed` | `"left"`, `"center"`, `"right"` | `"left"` | Auto alignment for each original-value category |
 | `tokens` | String-to-colour table | Built-in standard values | Partial standard overrides and custom token values |
 
 Zero activity delay means immediate display. `true` and negative delays are invalid. There is no separate enabled switch and no configurable spinner frame interval here. A deliberately different cadence belongs to `TimedFrames` in code.
 
 Colour, character repertoire and motion are independent. Disabling motion uses stable output rather than dropping useful results or errors. `"always"` cannot make cursor editing possible in a file and never adds decoration to structured output. Exact capability detection must be verified by the terminal implementation.
+
+### Table alignment
+
+Column Alignment.Auto consults the configured original-value category. Ignore null while classifying; all-null columns use other. Numbers represented by strings remain text. Headers align independently inside each calculated column width. Only left, center and right are valid configuration values: neither auto nor column is a TOML alignment. Explicit Column alignment overrides the configured cell default but not the independent header policy. Cell formatting never changes original values or their classification. [[docs/presentation/components/table|Table]] owns measurement, wrapping and fallback behavior.
 
 ### Spacing
 
@@ -57,7 +74,8 @@ See [[docs/presentation/text-and-layout|Text and layout]] for the component-spec
 
 1. Built-in defaults establish output preferences and standard token values.
 2. The loaded TOML overrides those values.
-3. An explicit node policy overrides the general automatic-activity setting.
+3. Explicit Column alignment overrides its configured cell-category default.
+4. An explicit node policy overrides the general automatic-activity setting.
 
 An omitted command policy inherits configuration; there is no additional parent-command policy chain. See [[docs/command-system/automatic-activity|Automatic activity]].
 
@@ -66,6 +84,7 @@ The application or adapter chooses the configuration path. R3CLI does not implic
 ## Validation
 
 - Unknown structural keys, unsupported schema versions and incorrect setting types are errors.
+- Reject unknown alignment categories, wrong types and values outside left/center/right.
 - Arbitrary keys under `[tokens]` are allowed, including unused custom names.
 - RGB colours use `#RRGGBB`; foregrounds also accept `"terminal-default"`.
 - `literal-block.background` requires explicit RGB.

@@ -22,7 +22,7 @@ var root = new FileEntry("project", null,
 Tree.From(root,
     children: entry => entry.Children,
     presentation: entry => new Line(
-        new Text(entry.Name + (entry.Size is null ? "/" : "")),
+        entry.Name + (entry.Size is null ? "/" : ""),
         new Subtext(entry.Size is long size ? $"  {size} B" : "")))
     .Show();
 
@@ -63,7 +63,7 @@ public sealed class Tree : IComponent
 
 ## Composition
 
-TreeNode is not IComponent; Tree supplies its position and connectors. TreeNode<TData> gives typed Value and heterogeneous Data access to the same object. Consumer subclasses can be heterogeneous. There is no public concrete Node, no invisible root and no forest constructor. From is the short path for existing nested data.
+TreeNode is not IComponent; Tree supplies its position and connectors. TreeNode<TData> gives typed Value and heterogeneous Data access to the same object. Consumer subclasses can be heterogeneous. There is no public concrete Node, no invisible root and no forest constructor. From is the short path for existing nested data. Its presentation callback and TreeNode.Presentation consistently name the mapping from original data to the displayed Line; data and children do not change when that line is formatted.
 
 ```mermaid
 classDiagram
@@ -119,7 +119,7 @@ var root = new FileEntry("project", null,
 Tree.From(root,
     children: entry => entry.Children,
     presentation: entry => new Line(
-        new Text(entry.Name + (entry.Size is null ? "/" : "")),
+        entry.Name + (entry.Size is null ? "/" : ""),
         new Subtext(entry.Size is long size ? $"  {size} B" : "")))
     .Show();
 

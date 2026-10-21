@@ -55,15 +55,15 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
     ]);
 
     var table = new Table(
-        [new Row("demo", 12), new Row("test", 3)],
-        ["Name", "Files"]);
+        ["Name", "Files"],
+        new Row("demo", 12), new Row("test", 3));
 
     var leader = new TabLeader(12, new Symbol("."));
 
     var tree = Tree.From(categories,
         children: category => category.Children,
         presentation: category => new Line(
-            new Text(category.Name),
+            category.Name,
             new Subtext($"  {category.Count}")));
 
     var metadataView = new View(
@@ -77,11 +77,11 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
     var report = Output.Show(
         new Banner("R3CLI presentation"),
         new Section("Introduction",
-            new Line(new Text("Primary text. "),
+            new Line("Primary text. ",
                 new Subtext("Additional details.")),
             new Title("Project report"),
             new Command("modpack project use demo"),
-            new Line(new Text("Project: "), new Subtext("demo selected")),
+            new Line("Project: ", new Subtext("demo selected")),
             new BlankLine(),
             new Separator(new Symbol("=-"))),
         new Section("Messages",
@@ -93,15 +93,15 @@ static ViewHandle ShowPresentation(CliNode command, out ViewHandle metadata)
         new Section("Project",
             new Field("Project", "demo"),
             new Section("Content",
-                new Field("Files", "12"),
+                new Field("Files", 12),
                 new Section("Validation", new Success("Checks passed.")))),
         new LiteralBlock("Name    Status\ndemo    ready"),
         new Section("Aligned fields",
             new Field("Name", "demo", leader),
-            new Field("Files", "12", leader),
-            new Line(new Text("Note"),
+            new Field("Files", 12, leader),
+            new Line("Note",
                 new TabLeader(12, new Symbol("_-\\_")),
-                new Text("Local"))),
+                "Local")),
         table,
         tree,
         new Diagnostic(DiagnosticLevel.Warning,
@@ -130,6 +130,6 @@ public sealed record Category(string Name, int Count, Category[] Children);
 
 The code includes literal examples of Info, Success, Warning, Failure and static Activity rather than recolouring arbitrary strings. Title has its own colour. Separator patterns and tree branches use Subtext's token. The LiteralBlock is compact and separated from following content. The nested Section branch demonstrates `═`, `─`, then `-`.
 
-Table places a default continuous Separator below the headers across the full table width, without changing structured data. The compact Table constructor maps header strings to positional Columns without changing Row or hiding unselected data. TabLeader targets a logical line-prefix width in terminal cells. Explicit Field leaders replace the default colon and gap; the same inline value can align a Line. The underscores/backslash pattern is literal Symbol content, not an escape language interpreted by R3CLI.
+Table places a default continuous Separator below the headers across the full table width, without changing structured data. Table takes columns first, requires at least one data row, centers headers and uses configured Auto cell alignment. The compact Table constructor maps header strings to positional Columns without changing Row or hiding unselected data. TabLeader targets a logical line-prefix width in terminal cells. Explicit Field leaders replace the default colon and gap; the same inline value can align a Line. The underscores/backslash pattern is literal Symbol content, not an escape language interpreted by R3CLI.
 
 Help is generated from the supplied command, not hand-constructed. Its content has no Banner. View updates replace the metadata region without producing new automatic blank lines per frame. The static capture freezes the initial state; the browser fixture can display the explicit progress replacement.

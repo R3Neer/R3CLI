@@ -4,24 +4,25 @@ type: presentation-component
 
 # Text
 
-Primary literal text. Strings in visual-content positions have the semantic shorthand meaning Text; the adapter or C# binding realizes that convenience.
+Primary literal text captured from a value. Strings in visual-content positions normalize to Text through the input unions; string -> Text is the only implicit text-style conversion.
 
 ## Usage
 
 ```csharp
-new Text("Project ready").Show();
+Output.Show("Project ready");
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
 
 ## API contract
 
-These are API extracts, not implementation bodies or a compiling source file. The primary constructor preserves the public camelCase value parameter; TextBase validates and retains it through the get-only Value property.
+These are API extracts, not implementation bodies or a compiling source file. TextBase captures the original value, runtime type and textual representation through get-only properties; conversion and validation bodies are omitted.
 
 ```csharp
-public sealed class Text(string value) : TextBase(value), IMessageBody
+public sealed class Text(object? value) : TextBase(value), IMessageBody
 {
-    // Value is inherited from TextBase.
+    public static implicit operator Text(string value);
+    // OriginalValue, OriginalType and Value are inherited from TextBase.
 }
 ```
 
@@ -31,7 +32,7 @@ Inherits the non-instantiable TextBase foundation; see [[docs/presentation/compo
 
 ## Behavior and validation
 
-Value is non-null and well-formed Unicode. Explicit LF/CRLF and internal empty lines are preserved; unsupported controls are rendered visibly rather than interpreted. Empty text does not itself force a blank line.
+Use the shared value-to-text policy in [[docs/presentation/composition|Composition]]. Captured Value is non-null and well-formed Unicode. Explicit LF/CRLF and internal empty lines are preserved; unsupported controls are rendered visibly rather than interpreted. Empty text does not itself force a blank line.
 
 ## Presentation
 
@@ -58,5 +59,15 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
-new Text("Project ready").Show();
+Output.Show("Project ready");
 ```
+
+## Additional examples
+
+```csharp
+Text ready = "Project ready";
+var count = new Text(12);
+Output.Show(ready, count);
+```
+
+OriginalValue retains 12 as an integer; Value is its captured display text. There is no implicit conversion from arbitrary object to Text.

@@ -11,7 +11,7 @@ Literal text displayed on one compact, soft-background rectangle. It neither exe
 ```csharp
 Output.Show(
     new LiteralBlock("Name    Status\ndemo    ready"),
-    new Text("The project is ready."));
+    "The project is ready.");
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -63,5 +63,5 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ```csharp
 Output.Show(
     new LiteralBlock("Name    Status\ndemo    ready"),
-    new Text("The project is ready."));
+    "The project is ready.");
 ```

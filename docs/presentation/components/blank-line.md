@@ -10,9 +10,9 @@ One explicit empty block line used to separate content. It is not inline whitesp
 
 ```csharp
 Output.Show(
-    new Text("Before"),
+    "Before",
     new BlankLine(),
-    new Text("After"));
+    "After");
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
@@ -60,7 +60,7 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 
 ```csharp
 Output.Show(
-    new Text("Before"),
+    "Before",
     new BlankLine(),
-    new Text("After"));
+    "After");
 ```

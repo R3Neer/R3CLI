@@ -9,19 +9,19 @@ Secondary literal text, used for supporting detail without changing the meaning 
 ## Usage
 
 ```csharp
-new Line(new Text("demo"), new Subtext("  local project")).Show();
+new Line("demo", new Subtext("  local project")).Show();
 ```
 
 Constructing the description does not print. `Show` is the explicit output boundary; see [[docs/presentation/output|Output]].
 
 ## API contract
 
-These are API extracts, not implementation bodies or a compiling source file. The primary constructor preserves the public camelCase value parameter; TextBase validates and retains it through the get-only Value property.
+These are API extracts, not implementation bodies or a compiling source file. TextBase captures the original value, runtime type and textual representation through get-only properties; conversion and validation bodies are omitted.
 
 ```csharp
-public sealed class Subtext(string value) : TextBase(value), IMessageBody
+public sealed class Subtext(object? value) : TextBase(value), IMessageBody
 {
-    // Value is inherited from TextBase.
+    // OriginalValue, OriginalType and Value are inherited from TextBase.
 }
 ```
 
@@ -31,7 +31,7 @@ Inherits the non-instantiable TextBase foundation; see [[docs/presentation/compo
 
 ## Behavior and validation
 
-Value is non-null and well-formed Unicode. Explicit LF/CRLF and internal empty lines are preserved; unsupported controls are rendered visibly rather than interpreted. Empty text does not itself force a blank line.
+Use the shared value-to-text policy in [[docs/presentation/composition|Composition]]. There is no implicit conversion from string to Subtext. Value is non-null and well-formed Unicode. Explicit LF/CRLF and internal empty lines are preserved; unsupported controls are rendered visibly rather than interpreted. Empty text does not itself force a blank line.
 
 ## Presentation
 
@@ -58,5 +58,5 @@ Shared wrapping, Unicode and control handling are defined in [[docs/presentation
 ### Preview source
 
 ```csharp
-new Line(new Text("demo"), new Subtext("  local project")).Show();
+new Line("demo", new Subtext("  local project")).Show();
 ```

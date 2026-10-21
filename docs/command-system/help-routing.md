@@ -38,10 +38,11 @@ public Help GetHelp();
 protected virtual void ConfigureHelp(HelpBuilder help);
 
 // Help members.
-public Help SelectSections(params string[] ids);
+public Help SelectSections(params IEnumerable<string> ids);
 
 // HelpBuilder members.
-public void AddContent(string sectionId, params IComponent[] content);
+public void AddContent(string sectionId, params IEnumerable<ComponentInput> content);
+    public void AddContent(string sectionId, IEnumerable<IComponent> content);
 public void AddSection(HelpSection section, string? after = null);
 ```
 

@@ -14,9 +14,9 @@ Output.Show(
     new Field("Project", "demo", dotted),
     new Field("Files", "12", dotted),
     new Field("Project", "demo", new TabLeader(14)),
-    new Line(new Text("Note"),
+    new Line("Note",
         new TabLeader(12, new Symbol("_-\\_")),
-        new Text("Local")));
+        "Local"));
 ```
 
 The two dotted values begin at the same target position. The third uses ordinary spaces. Construction does not print.
@@ -95,9 +95,9 @@ Output.Show(
     new Field("Project", "demo", dotted),
     new Field("Files", "12", dotted),
     new Field("Project", "demo", new TabLeader(14)),
-    new Line(new Text("Note"),
+    new Line("Note",
         new TabLeader(12, new Symbol("_-\\_")),
-        new Text("Local")));
+        "Local"));
 ```
 
 The HTML also allows inspecting a target already reached, custom pattern fitting and prefix measurement. Those controls demonstrate the same value contract rather than a separate public rendering API.
