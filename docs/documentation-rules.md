@@ -60,7 +60,7 @@ An unresolved decision has one document under `docs/questions/`, using the quest
 
 ## Publication checks
 
-Check input-union normalization, string -> Text only, nonempty table rows, columns-first signatures and concrete TOML alignment values. Check metadata, required sections, unique H1 titles, local links and image targets, balanced code fences, related-type diagrams, exactly eight standard tokens, current HTML/capture pairs and absence of template placeholders. Verify HTML with a real browser, including interaction and overflow. Review API/examples against the accepted contract. Documentation checks do not imply library compilation, native-shell tests or runtime implementation.
+Check input-union normalization, string -> Text only, nonempty table rows, columns-first signatures and concrete TOML alignment values. Check metadata, required sections, unique H1 titles, local links and image targets, balanced code fences, related-type diagrams, exactly eight standard tokens, ten complete built-in presets and SDK pin consistency, current HTML/capture pairs and absence of template placeholders. Verify HTML with a real browser, including interaction and overflow. Review API/examples against the accepted contract. Documentation checks do not imply library compilation, native-shell tests or runtime implementation.
 
 Run the standard-library checker from the repository root:
 

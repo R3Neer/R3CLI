@@ -54,3 +54,14 @@ for(const id of ['leader-label','leader-width','leader-pattern']){
     fitLeaders();
   });
 }
+
+// Documentary palette switching only; no terminal query or R3CLI code runs here.
+function applyDocumentaryTheme(){
+  const selected=document.querySelector('#theme-preset')?.value || 'catppuccin-mocha';
+  const preset=window.documentaryThemes[selected];
+  screen.style.setProperty('--reference-background',preset['reference-background']);
+  for(const [token,value]of Object.entries(preset.tokens))screen.style.setProperty('--'+token.replaceAll('.','-'),value);
+  screen.dataset.preset=selected;
+}
+document.querySelector('#theme-preset')?.addEventListener('change',applyDocumentaryTheme);
+applyDocumentaryTheme();

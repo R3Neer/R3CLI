@@ -36,6 +36,7 @@ async function main() {
       try {
         await page.goto(pathToFileURL(path.join(previewDirectory, name)).href);
         await page.waitForFunction(() => window.previewStatus?.ready);
+        await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))));
         await page.locator('main').screenshot({ path: path.join(captureDirectory, `${slug}.png`) });
         const wide = await page.evaluate(() => ({ width: document.documentElement.scrollWidth, viewport: innerWidth }));
         if (wide.width > wide.viewport) errors.push('Horizontal clipping at normal width');
@@ -51,6 +52,31 @@ async function main() {
               && getComputedStyle(rule.firstElementChild).color === getComputedStyle(lines[0].firstElementChild).color;
           }));
           if (rules.some(valid => !valid)) errors.push('Table header rule must follow headers, span the table and use subtext');
+        }
+        const initialPreset = await page.locator('.screen').getAttribute('data-preset');
+        if (initialPreset !== 'catppuccin-mocha') errors.push('Initial fixture must use Catppuccin Mocha');
+        if (slug === 'structure') {
+          const choices = await page.locator('#theme-preset option').evaluateAll(options => options.map(o => o.value));
+          if (choices.length !== 10) errors.push('Combined example must expose all ten built-in profiles');
+          for (const preset of choices) {
+            await page.selectOption('#theme-preset', preset);
+            const consistent = await page.evaluate(() => {
+              const screen = document.querySelector('.screen');
+              const preset = window.documentaryThemes[screen.dataset.preset];
+              const expected = document.createElement('span');
+              expected.style.color = preset.tokens['text.foreground'];
+              expected.style.backgroundColor = preset['reference-background'];
+              document.body.append(expected);
+              const a = getComputedStyle(screen), b = getComputedStyle(expected);
+              const matches = a.color === b.color && a.backgroundColor === b.backgroundColor;
+              expected.remove();
+              return matches;
+            });
+            if (!consistent) errors.push(`Preset did not update foreground and backdrop: ${preset}`);
+          }
+          await page.selectOption('#theme-preset', 'catppuccin-mocha');
+        } else if (await page.locator('#theme-preset').count()) {
+          errors.push('Individual component previews must not expose a theme selector');
         }
         if (slug === 'separator') {
           const actual = await page.evaluate(() => {

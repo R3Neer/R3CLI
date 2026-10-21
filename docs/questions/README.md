@@ -10,7 +10,6 @@ Each document identifies one active design decision. Questions do not define the
 
 | Question | Boundary |
 |---|---|
-| [[docs/questions/default-colours]] | Exact built-in RGB values for the eight tokens |
 | [[docs/questions/native-aot-or-jit]] | Backend execution and distribution mode |
 | [[docs/questions/adapter-transport]] | Portable values and cross-process protocol |
 | [[docs/questions/adapter-derivation]] | Native-language reusable contract specializations |

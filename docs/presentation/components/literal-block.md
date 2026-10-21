@@ -29,7 +29,7 @@ public sealed class LiteralBlock : IComponent
 
 ## Composition
 
-Contains literal text, not a nested component tree. The foreground remains ordinary Text; the background covers content and padding.
+Contains literal text, not a nested component tree. The foreground remains ordinary Text; the local background covers content and padding even when output.background preserves the general terminal background. Resolve both from the preset and token overrides. With neutral fallback and no explicit local override, preserve the terminal background while retaining padding and lower spacing; colour-disabled output emits no coloured rectangle.
 
 ## Behavior and validation
 

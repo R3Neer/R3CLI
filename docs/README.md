@@ -13,7 +13,7 @@ This is the current specification for R3CLI's C# backend and language adapters. 
 | Overall design | [[docs/structure]] | Data, components, output and commands in one worked example |
 | General class diagram | [[docs/class-diagram]] | Relationships between the shared API types |
 | Presentation | [[docs/presentation/README]] | Components, composition, output and layout |
-| Configuration | [[docs/configuration/README]] | Direct TOML settings and colour-token lookup |
+| Configuration | [[docs/configuration/README]] | Built-in themes, automatic selection, background policy and token overrides |
 | Command System | [[docs/command-system/README]] | Parent-defined commands, help, diagnostics and activity |
 | Integration | [[docs/integration/README]] | Idiomatic adapters and native structured-data boundaries |
 | Questions | [[docs/questions/README]] | Concrete decisions that remain outside the closed visual contracts |

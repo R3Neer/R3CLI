@@ -32,6 +32,10 @@ Text, Subtext and LiteralBlock never interpret embedded ANSI. Unsupported contro
 
 Cell width depends on a supported terminal profile, and valid Unicode is not a guarantee that every font draws connected or identically sized glyphs. Real-terminal verification is required at implementation time.
 
+### Theme and background scope
+
+Colours resolve through [[docs/configuration/built-in-themes|Built-in themes]] and explicit token overrides. General backgrounds are preserved unless output.background explicitly requests a theme fill over the owned region. A theme's reference background is selection metadata, not a mandatory painted surface. LiteralBlock owns its local rectangle. Colour-disabled and structured output receive no coloured fills or background queries. Automatic detection uses the terminal's reported base RGB, not a screenshot or transparency-composited pixel average.
+
 ### Wrapping and narrow output
 
 Prefer word breaks, then wrap overlong words at grapheme boundaries. Do not silently truncate or add ellipses. Reduce decoration, indentation and padding before losing content. A grapheme wider than the complete available width gets a visible escapable representation that can itself wrap.

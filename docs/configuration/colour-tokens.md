@@ -32,7 +32,7 @@ Title retains its own colour role. Line, View, whitespace and Symbol itself own 
 "project.path.foreground" = "#A7D8A0"
 ```
 
-Values are `#RRGGBB`. Foreground tokens may use `"terminal-default"`; the literal-block background requires explicit RGB. Omitted standard tokens retain built-in defaults. The final built-in RGB selection is addressed in [[docs/questions/default-colours|Default colours]].
+Values are `#RRGGBB`. Foreground tokens may use `"terminal-default"`; the literal-block background requires explicit RGB. Omitted standard tokens inherit the selected [[docs/configuration/built-in-themes|built-in theme]] or the neutral fallback. Theme selection is automatic when output.theme is omitted; [tokens] overrides follow selection.
 
 ## Resolution rules
 
@@ -48,6 +48,6 @@ The spelling of the adapter authoring API belongs to [[docs/integration/adapter-
 
 ## Validation
 
-Reject malformed colour values before rendering and report the file, key and cause. A referenced custom name that is not configured is an error; an unused configured name is not. There are no named themes or theme inheritance. Sharing a palette means copying token entries. Version 1 has no aliases between token names, formulas or computed colour expressions. The literal-block background is supplied explicitly; rendering does not assume that the terminal's real background is known.
+Reject malformed colour values before rendering and report the file, key and cause. A referenced custom name that is not configured is an error; an unused configured name is not. Only built-in theme identifiers may be selected; user-defined themes and theme inheritance are unsupported. Custom token names remain independently supported. Version 1 has no aliases between token names, formulas or computed colour expressions. The literal-block background comes from the resolved preset or an explicit override. Neutral fallback preserves the terminal background when no local override exists. General output.background does not disable a component's intentional local background.
 
 For the complete file schema and validation, see [[docs/configuration/toml|TOML configuration]].

@@ -140,7 +140,7 @@ def check(root: Path) -> dict:
         errors.append(f"HTML set mismatch: missing {sorted(expected-previews)}, extra {sorted(previews-expected)}")
     if captures != expected:
         errors.append(f"PNG set mismatch: missing {sorted(expected-captures)}, extra {sorted(captures-expected)}")
-    for path in (docs / "assets/previews").glob("*.html"):
+    for path in (docs / "assets").rglob("*.html"):
         parser = LocalResources()
         parser.feed(path.read_text(encoding="utf-8"))
         for resource in parser.resources:
@@ -178,6 +178,57 @@ def check(root: Path) -> dict:
                     fail(config, "named themes are outside the current schema")
             except tomllib.TOMLDecodeError as error:
                 fail(config, f"invalid TOML example: {error}")
+    # Preset data and SDK pin are documentary/build metadata, not runtime code.
+    catalog_path = docs / "configuration/built-in-themes.json"
+    try:
+        catalog = json.loads(catalog_path.read_text(encoding="utf-8"))
+        expected = {"catppuccin-mocha", "catppuccin-latte", "gruvbox-dark", "gruvbox-light", "solarized-dark", "solarized-light", "nord-dark", "nord-light", "tokyo-night", "tokyo-day"}
+        if set(catalog) != expected:
+            fail(catalog_path, "built-in catalog must contain the ten accepted profiles")
+        token_reference = (docs / "configuration/built-in-themes.md").read_text(encoding="utf-8")
+        def luminance(value):
+            channels = [int(value[i:i+2], 16)/255 for i in (1, 3, 5)]
+            channels = [c/12.92 if c <= .04045 else ((c+.055)/1.055)**2.4 for c in channels]
+            return sum(c*w for c,w in zip(channels, (.2126,.7152,.0722)))
+        def ratio(a,b):
+            lo,hi = sorted((luminance(a), luminance(b)))
+            return (hi+.05)/(lo+.05)
+        for name, preset in catalog.items():
+            tokens = preset["tokens"]
+            if set(tokens) != TOKENS:
+                fail(catalog_path, f"{name}: expected exactly eight tokens")
+            values = [preset["reference-background"], *tokens.values()]
+            if any(not re.fullmatch(r"#[0-9a-fA-F]{6}", value) for value in values):
+                fail(catalog_path, f"{name}: invalid RGB")
+                continue
+            if f"### {name}" not in token_reference:
+                fail(catalog_path, f"{name}: missing canonical reference")
+            for token, value in tokens.items():
+                if f"| `{token}` | `{value.upper()}` |" not in token_reference:
+                    fail(catalog_path, f"{name}/{token}: reference value differs")
+                if token != "literal-block.background" and ratio(value, preset["reference-background"]) < 4.5:
+                    fail(catalog_path, f"{name}/{token}: reference contrast below specimen criterion")
+            if ratio(tokens["text.foreground"],tokens["literal-block.background"]) < 4.5:
+                fail(catalog_path, f"{name}: LiteralBlock text contrast below specimen criterion")
+        preview_source = (docs / "assets/previews/theme-data.js").read_text(encoding="utf-8")
+        browser_catalog = json.loads(preview_source.split("window.documentaryThemes = ",1)[1].strip().removesuffix(";"))
+        if browser_catalog != catalog:
+            fail(catalog_path, "preview catalog differs from canonical data")
+        first_example = json.loads("{}")
+        if config.exists():
+            first_example = tomllib.loads(re.findall(r"```toml\n(.*?)\n```", config.read_text(encoding="utf-8"), re.S)[0])
+            output = first_example.get("output", {})
+            if output.get("theme") != "catppuccin-mocha" or output.get("background") != "terminal":
+                fail(config, "schema example must select a built-in and preserve the terminal background")
+            if first_example.get("tokens") != {key:value.upper() for key,value in catalog["catppuccin-mocha"]["tokens"].items()}:
+                fail(config, "schema token example differs from the selected preset")
+        pin = json.loads((root / "global.json").read_text(encoding="utf-8"))
+        if pin.get("sdk") != {"version":"11.0.100-rc.2.26504.105", "rollForward":"disable", "allowPrerelease":True}:
+            errors.append("global.json: unexpected SDK selection")
+        if (docs / "questions/default-colours.md").exists():
+            errors.append("resolved default-colours question remains active")
+    except (OSError, ValueError, KeyError, IndexError) as error:
+        fail(catalog_path, f"preset/SDK evidence validation failed: {error}")
     # Cross-document API invariants: these check the specification, not a backend.
     invariant_files = {
         "presentation/components/tab-leader.md": (

@@ -32,7 +32,7 @@ The complete type map is [[docs/class-diagram]]. Component contracts are under [
 
 ## Example
 
-The combined fixture exercises every Presentation Component, the eight tokens, shared margins, Unicode rules, tree branches, a real-data table and an editable live region. The interactive preview exposes controls for animation and the explicit region update. It is a documentation prototype, not the R3CLI backend.
+The combined fixture uses the Catppuccin Mocha preset on its simulated reference background; theme selection does not paint the user's terminal by default. [[docs/configuration/built-in-themes|Built-in themes]] compares the light/dark profiles. The combined fixture exercises every Presentation Component, the eight tokens, shared margins, Unicode rules, tree branches, a real-data table and an editable live region. The interactive preview exposes a theme selector that updates both semantic colours and the simulated terminal background, together with animation and explicit region-update controls. Individual component previews keep a fixed preset. It is a documentation prototype, not the R3CLI backend.
 
 The `command` parameter below is an application-owned CliNode whose generated help describes `modpack project use`: usage `modpack project use <name>`, options `--no-human` and `-h, --help`, and an example `modpack project use demo`. It supplies the usage/options/examples sections selected by this fixture. The CLI parser/typed definition mechanism is not invented by this example.
 
